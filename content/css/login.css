@@ -1,0 +1,35 @@
+/**
+* - login
+**/
+body {
+    display: flex;
+    justify-content: center;
+}
+.form {
+    display: flex;
+    width: 300px;
+    height: 300px;
+    margin-top: 30px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+input {
+    border: 0;
+    padding: 1em 0.8em;
+    background: white;
+    box-shadow: none;
+    font-size: 100%;
+    width: 100%;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #fff inset;
+    -webkit-text-fill-color: #555;
+}
+
+.group-inputs {
+    border: 1px solid #d5d5d5;
+}
+.bottom-line{
+    border-bottom: 1px solid #d5d5d5;
+}
