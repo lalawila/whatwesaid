@@ -5,7 +5,7 @@ RewriteBase /
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteCond $1 !^(phpmyadmin/|)$
 RewriteRule ^(.*)$ / [R]
-RewriteCond $1 !^(index\.php|robots\.txt|content/.*|phpmyadmin/.*)$
+RewriteCond $1 !^(index\.php|deploy\.php|robots\.txt|content/.*|phpmyadmin/.*)$
 RewriteRule ^(.*)$ index.php [L]
 
 </IfModule>
