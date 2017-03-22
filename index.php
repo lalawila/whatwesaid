@@ -11,6 +11,6 @@ if (!defined('ABSPATH')) {
 //echo '</br>';
 //echo var_dump ($_REQUEST);
 
-
-require_once (ABSPATH . 'setting.php');
-require_once (ABSPATH . 'display-page.php');
+echo 'ess';
+//require_once (ABSPATH . 'setting.php');
+//require_once (ABSPATH . 'display-page.php');
