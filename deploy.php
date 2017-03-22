@@ -1,9 +1,7 @@
 <?php
 
-$commands = array('git pull', );
+$commands = array('git pull origin master', 'git status','echo $PWD', 'whoami');
 foreach ($commands as $command) {
-    // Run it
-    echo $command;
     echo shell_exec($command);
 }
 
