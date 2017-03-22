@@ -1,9 +1,10 @@
 <?php
-	$commands = array(
-		'git pull origin master',
-	);
-	foreach($commands AS $command){
-		// Run it
-		echo shell_exec($command);
-	}
+
+$commands = array('git pull', );
+foreach ($commands as $command) {
+    // Run it
+    echo $command;
+    echo shell_exec($command);
+}
+
 ?>
