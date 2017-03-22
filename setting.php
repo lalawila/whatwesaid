@@ -24,7 +24,7 @@
     require_once ( ABSPATH . WWSINC . 'class-ws-user.php' );
     require_once ( ABSPATH . WWSINC . 'formatting.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-db.php' );
-    require_once ( ABSPATH . WWSINC . 'class-manage.php' );
+    require_once ( ABSPATH . WWSINC . 'class-ws-article.php' );
     require_once ( ABSPATH . WWSINC . 'class-wws.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-error.php' ); 
     require_once ( ABSPATH . WWSINC . 'class-ws-comment.php' ); 
