@@ -36,8 +36,13 @@
     
     init_lang();
     ws_cache_init();
-    $GLOBALS['wsdb'] = new WS_DB('root','lq931110','wws','45.76.176.44');
-    $GLOBALS['manage'] = new Manage;
+    
+    $stf = fopen("setting-data.json", "r") or die("cant find setting-data.son");
+    $data = file_get_contents("setting-data.json");
+    $jsdata = json_decode ($data, true);
+    fclose($stf);
+    $GLOBALS['wsdb'] = new WS_DB($jsdata['MySql']['username'],$jsdata['MySql']['password'],$jsdata['MySql']['table'], $jsdata['MySql']['hostname']);
+    $GLOBALS['article'] = new WS_Article;
     $GLOBALS['wws'] = new WWS;
 
     date_default_timezone_set('UTC'); 

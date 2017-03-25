@@ -1,12 +1,12 @@
 <?php
 class WWS {
-    private $manage;
+    private $article;
     
     public function __construct() {
-        $this->manage = $GLOBALS['manage'];
+        $this->article = $GLOBALS['article'];
     }
     public function is_article(){
-        return $this->manage->is_article();
+        return $this->article->is_article();
     }
         
         

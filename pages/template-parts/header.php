@@ -6,7 +6,7 @@
 	<link rel="profile" href="http://gmpg.org/xfn/11">
 	<?php 
         load_style();
-        if($GLOBALS['manage']->is_article())
+        if($GLOBALS['article']->is_article())
             WS_Comment::load_ckeditor(); 
     ?>
 </head>

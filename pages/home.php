@@ -2,7 +2,7 @@
     <main id="main" class="site-main" role="main">
         <div  class="posts">
  	      <?php
-			     $manage = $GLOBALS['manage'];
+			     $manage = $GLOBALS['article'];
                  $posts=$manage->get_all_posts('en');
                 foreach ( $posts as $post ) 
                 {
