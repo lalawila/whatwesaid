@@ -41,6 +41,8 @@
     $data = file_get_contents("setting-data.json");
     $jsdata = json_decode ($data, true);
     fclose($stf);
+
+    $GLOBALS['page'] = get_page_name();
     $GLOBALS['wsdb'] = new WS_DB($jsdata['MySql']['username'],$jsdata['MySql']['password'],$jsdata['MySql']['table'], $jsdata['MySql']['hostname']);
     $GLOBALS['article'] = new WS_Article;
     $GLOBALS['wws'] = new WWS;

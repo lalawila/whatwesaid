@@ -1,6 +1,7 @@
 <?php
 
-function get_header() {
+function get_header( ) {
+
     include_once (ABSPATH . WWSTP . 'header.php');
 }
 function get_site_url() {
@@ -21,9 +22,7 @@ function load_style( $style = 'style.css' ) {
 function page_404() {
     require_once (ABSPATH . 'pages/404.php');
 }
-function load_ckeditor() {
-    echo '<script src="//cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>';
-}
+
 function get_sidebar() {
     include_once (ABSPATH . WWSTP . 'sidebar.php');
 }

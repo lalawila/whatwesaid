@@ -37,7 +37,7 @@ final class WS_Article {
 
         $article = $this->sql->get_results("
     	SELECT ID, original, date, en, zh
-    	FROM Main
+    	FROM articles
         WHERE ID=$ID
     	", ARRAY_A);
         $article[0]['author'] = $this->get_author($ID);

@@ -118,4 +118,10 @@
     font-family:Arial;
 }
 
-
+/**
+ *  4.0 - submit article
+ */
+.sumbit-article-form {
+   display: flex;
+   flex-direction: column; 
+}

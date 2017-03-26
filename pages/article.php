@@ -1,20 +1,20 @@
 <?php get_header(); ?>
     <main id="main" class="site-main" role="main">
         <div  class="posts">
- 	      <?php
-                $lang = $GLOBALS['lang'];
-			    $manage = $GLOBALS['manage'];
-                $article=$manage->the_article();
-                if($article['en']!=NULL&&$lang=='en'){
-                    $ID=$article['en'];
+		<?php
+		global $lang;
+		global $article;
+                $current_article=$article->the_article();
+                if($current_article['en']!=NULL&&$lang=='en'){
+                    $ID=$current_article['en'];
                 }
-                else if($article['zh']!=NULL&&$lang=='zh'){
-                    $ID=$article['zh'];
+                else if($current_article['zh']!=NULL&&$lang=='zh'){
+                    $ID=$current_article['zh'];
                 }
                 else{
                     return;
                 }  
-                $post=$manage->get_post($lang,$ID);
+                $post=$article->get_post($lang,$ID);
                 ?>
                 <h1 class="title"><?php echo $post['post_title']; ?></h1>
                 <div class="content"><?php echo $post['post_content']; ?></div>

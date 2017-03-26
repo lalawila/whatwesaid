@@ -1,9 +1,10 @@
 <?php
-$page = get_page_name();
+global $page;
 switch ($page) {
     case 'article':
     case 'login':
     case 'people':
+    case 'submit-article':
         require_once (ABSPATH . 'pages/' . $page . '.php');
         break;
     case '':

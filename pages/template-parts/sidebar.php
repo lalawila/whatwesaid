@@ -5,7 +5,7 @@ if ($GLOBALS['lang'] == 'zh'){
 else{
     $en='selected';
 }
-$manage = $GLOBALS['manage'];
+global $article;
 ?>
 <div id="secondary" class="siderbar" role="complementary">
 	
@@ -16,11 +16,11 @@ $manage = $GLOBALS['manage'];
 </select>
 </form>
 <?php
-if($manage->is_article()):
+if($article->is_article()):
 ?>
 <label><?php echo _e('Author:'); ?></label>
 <?php
-echo $manage->the_article()['author'][0]['name'];
+echo $article->the_article()['author'][0]['name'];
 endif;
 ?>
 
