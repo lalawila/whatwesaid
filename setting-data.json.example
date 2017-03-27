@@ -3,6 +3,6 @@
 	"hostname" : "the host name your mysql in",
 	"username" : "your mysql username",
 	"password" : "your mysql password",
-	"table"	   : "your mysql table name"
+	"database" : "your mysql table name"
 	}
 }

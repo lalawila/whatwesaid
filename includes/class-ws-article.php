@@ -8,6 +8,8 @@ final class WS_Article {
     }
 
     public function is_article() {
+	if ( isset($GLOBALS['page'] ))
+	    return $GLOBALS['page'] == 'page';		
         $path = dirname($_SERVER['REQUEST_URI']);
         if ($path == '/article') {
             return true;
@@ -31,7 +33,7 @@ final class WS_Article {
         return $this->the_article()['ID'];
     }
 
-    public function get_article($ID) {
+    public function get_article( $ID, $field = Null) {
         if (!is_null(self::$_article) && self::$_article['ID'] == $ID)
             return self::$_article;
 

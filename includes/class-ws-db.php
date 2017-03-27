@@ -485,11 +485,12 @@ class WS_DB {
 		}
 	}
     
-    public function insert( $table, $data, $format = null ) {
+    	public function insert( $table, $data, $format = null ) {
 		return $this->_insert_replace_helper( $table, $data, $format, 'INSERT' );
 	}
-    /** 
-     * @param string       $table  Table name
+    	/** 
+	 *
+	 * @param string       $table  Table name
 	 * @param array        $data   Data to insert (in column => value pairs).
 	 *                             Both $data columns and $data values should be "raw" (neither should be SQL escaped).
 	 *                             Sending a null value will cause the column to be set to NULL - the corresponding format is ignored in this case.
@@ -531,7 +532,7 @@ class WS_DB {
 		$this->check_current_query = false;
 		return $this->query( $this->prepare( $sql, $values ) );
 	}
-    protected function process_fields( $table, $data, $format ) {
+    	protected function process_fields( $table, $data, $format ) {
 		$data = $this->process_field_formats( $data, $format );
 		if ( false === $data ) {
 		    WS_Error::add_error('process field formats error');
@@ -559,7 +560,7 @@ class WS_DB {
 
 		return $data;
 	}
-    protected function process_field_formats( $data, $format ) {
+	protected function process_field_formats( $data, $format ) {
 		$formats = $original_formats = (array) $format;
 
 		foreach ( $data as $field => $value ) {
@@ -582,7 +583,7 @@ class WS_DB {
 
 		return $data;
 	}
-    protected function process_field_charsets( $data, $table ) {
+	protected function process_field_charsets( $data, $table ) {
 		foreach ( $data as $field => $value ) {
 			if ( '%d' === $value['format'] || '%f' === $value['format'] ) {
 				/*
@@ -603,7 +604,7 @@ class WS_DB {
 
 		return $data;
 	}
-    protected function process_field_lengths( $data, $table ) {
+	protected function process_field_lengths( $data, $table ) {
 		foreach ( $data as $field => $value ) {
 			if ( '%d' === $value['format'] || '%f' === $value['format'] ) {
 				/*
@@ -623,7 +624,7 @@ class WS_DB {
 
 		return $data;
 	}
-    protected function strip_invalid_text( $data ) {
+	protected function strip_invalid_text( $data ) {
 		$db_check_string = false;
 
 		foreach ( $data as &$value ) {
