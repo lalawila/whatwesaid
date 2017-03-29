@@ -27,9 +27,13 @@ function get_sidebar() {
     include_once (ABSPATH . WWSTP . 'sidebar.php');
 }
 function get_page_name() {
-    $page = explode('/', $_SERVER['REDIRECT_URL']);
-    //preg_match ('@^/(.*)\???@' ,$_SERVER['REQUEST_URI'],$page);
-    return $page[1];
+
+	if ($_SERVER['REQUEST_URI'] == '/')
+		return 'home';
+	$page = null;
+	if (preg_match ('@.*\/(.*?)(?:\?|$)@' ,$_SERVER['REQUEST_URI'],$page))
+		return $page[1];
+    	return '404';
 }
 function get_locale() {
     //不精确，得修改

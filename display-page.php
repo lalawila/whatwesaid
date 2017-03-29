@@ -7,7 +7,7 @@ switch ($page) {
     case 'submit-article':
         require_once (ABSPATH . 'pages/' . $page . '.php');
         break;
-    case '':
+    case 'home':
         require_once (ABSPATH . 'pages/home.php');
         break;
     default:

@@ -10,6 +10,6 @@ if (!defined('ABSPATH')) {
 //echo var_dump($_GET);
 //echo '</br>';
 //echo var_dump ($_REQUEST);
-
+//echo var_dump($_SERVER);
 require_once (ABSPATH . 'setting.php');
 require_once (ABSPATH . 'display-page.php');
