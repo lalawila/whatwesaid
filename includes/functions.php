@@ -2,7 +2,7 @@
 
 function get_header( ) {
 
-    include_once (ABSPATH . WWSTP . 'header.php');
+    require_once (ABSPATH . WWSTP . 'header.php');
 }
 function get_site_url() {
     if (get_locale() == 'en'){
@@ -18,6 +18,9 @@ function load_style( $style = 'style.css' ) {
     printf('<link href="%s" type="text/css" rel="stylesheet">',
         '/content/css/' . $style);
     //load_ckeditor();
+}
+function load_script( $script ) {
+	printf('<script src="%s" type="text/javascript"></script>', '/content/js/' . $script);
 }
 function page_404() {
     require_once (ABSPATH . 'pages/404.php');

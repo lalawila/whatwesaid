@@ -4,3 +4,4 @@ setting-data.json
 #not vim caching file
 *~
 *.swp
+*.swo
