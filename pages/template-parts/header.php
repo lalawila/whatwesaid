@@ -7,7 +7,7 @@
 	<?php 
 	load_style('style.css');
 
-        if($GLOBALS['page'] === 'submit-article'):
+        if($GLOBALS['splited_uri'][0] === 'submit-article'):
 		WS_Comment::load_ckeditor(); 
 		load_script('detect-lang-ajax.js');
 	endif;

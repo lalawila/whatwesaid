@@ -66,13 +66,33 @@ final class WS_Article {
         return $authors;
     }
 
-    public function get_all_posts($lang) {
-        $tablename = $lang . '_posts';
-        $posts = $this->sql->get_results("
-    	SELECT ID, article_ID, post_title, post_excerpt
-    	FROM $tablename
-    	", ARRAY_A);
-        return $posts;
+    public function get_article_from_newest( $num = 5, $lang = "ori" ) {
+	$title   = $lang . '_title';
+	$content = $lang . '_content';
+	if( $lang == "ori" ):	
+        	$ats_temp = $this->sql->get_results("
+    		SELECT ID, lang, date, en_title, en_content, zh_title, zh_content
+    		FROM articles
+		order by ID desc limit $num
+		", ARRAY_A);
+		foreach( $ats_temp as $at) {
+			$at['title']   = $at[$at['lang'] . '_title'];
+			$at['content'] = $at[$at['lang'] . '_content'];
+			unset($at['en_title']);
+			unset($at['zh_title']);
+			unset($at['en_content']);
+			unset($at['zh_content']);
+			$articles[] = $at;
+		} 
+	else:
+        	$articles = $this->sql->get_results("
+    		SELECT ID, lang, date, $ltitle,$content 
+    		FROM articles
+		WHERE lang=$lang
+		order by ID desc limit $num
+		", ARRAY_A);
+	endif;
+        return $articles;
     }
 
     public function get_post($lang, $ID) {

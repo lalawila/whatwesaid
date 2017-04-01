@@ -29,14 +29,18 @@ function page_404() {
 function get_sidebar() {
     include_once (ABSPATH . WWSTP . 'sidebar.php');
 }
-function get_page_name() {
+function split_uri() {
 
-	if ($_SERVER['REQUEST_URI'] == '/')
-		return 'home';
-	$page = null;
-	if (preg_match ('@.*\/(.*?)(?:\?|$)@' ,$_SERVER['REQUEST_URI'],$page))
-		return $page[1];
-    	return '404';
+	//if ($_SERVER['REQUEST_URI'] == '/')
+	//	return 'home';
+	//$page = null;
+	//if (preg_match ('@.*\/(.*?)(?:\?|$)@' ,$_SERVER['REQUEST_URI'],$page))
+       	//	return $page[1];
+        //return '404';
+
+        $uri = null;
+        preg_match_all( '@(?:\/|)(.+?)(?:\/|\?)@', $_SERVER['REQUEST_URI'], $uri );
+        return empty($uri[1]) ? ['home']: $uri[1];
 }
 function get_locale() {
     //不精确，得修改

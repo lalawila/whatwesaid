@@ -11,8 +11,8 @@ global $article;
 	
 <form>
 <select class="language" name="language" onchange="window.location.href=this.options[selectedIndex].value" >
-    <option value="https://whatwesaid.xyz<?php echo $_SERVER['REQUEST_URI']?>" <?php echo $en?> >English</option>
-    <option value="https://zh.whatwesaid.xyz<?php echo $_SERVER['REQUEST_URI']?>" <?php echo $zh?> >中文</option>
+    <option value="<?php echo $_SERVER['REQUEST_URI']?>" <?php echo $en?> >English</option>
+    <option value="<?php echo $_SERVER['REQUEST_URI']?>" <?php echo $zh?> >中文</option>
 </select>
 </form>
 <?php

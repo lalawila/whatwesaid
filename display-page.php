@@ -1,11 +1,11 @@
 <?php
-global $page;
-switch ($page) {
+global $splited_uri;
+switch ($splited_uri[0]) {
     case 'article':
     case 'login':
     case 'people':
     case 'submit-article':
-        require_once (ABSPATH . 'pages/' . $page . '.php');
+        require_once (ABSPATH . 'pages/' . $splited_uri[0] . '.php');
         break;
     case 'home':
         require_once (ABSPATH . 'pages/home.php');
