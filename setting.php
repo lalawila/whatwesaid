@@ -9,16 +9,14 @@
     define( 'WWSTP', 'pages/template-parts/' );
     
     
-    define( 'SITE_EN', 'https://whatwesaid.xyz');
-    define( 'SITE_ZH', 'https://zh.whatwesaid.xyz');
-    
 
     // we've writen this code where we need
     //function __autoload($classname) {
     //    $filename = ABSPATH . WWSINC . 'class-' . $classname . '.php';
     //    include_once ($filename);
     //}
-    
+
+    require_once ( ABSPATH . 'conf.php'); 
     require_once ( ABSPATH . WWSINC . 'constants.php' );
     require_once ( ABSPATH . WWSINC . 'functions.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-user.php' );
@@ -37,13 +35,9 @@
     init_lang();
     ws_cache_init();
     
-    $stf = fopen("setting-data.json", "r") or die("cant find setting-data.son");
-    $data = file_get_contents("setting-data.json");
-    $jsdata = json_decode ($data, true);
-    fclose($stf);
 
     $GLOBALS['splited_uri'] = split_uri();
-    $GLOBALS['wsdb'] = new WS_DB($jsdata['MySql']['username'],$jsdata['MySql']['password'],$jsdata['MySql']['database'], $jsdata['MySql']['hostname']);
+    $GLOBALS['wsdb'] = new WS_DB(sql_username, sql_password, sql_database, sql_hostname);
     $GLOBALS['article'] = new WS_Article;
     $GLOBALS['wws'] = new WWS;
 

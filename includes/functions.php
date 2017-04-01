@@ -29,6 +29,9 @@ function page_404() {
 function get_sidebar() {
     include_once (ABSPATH . WWSTP . 'sidebar.php');
 }
+function get_footer() {
+    include_once (ABSPATH . WWSTP . 'footer.php');
+}
 function split_uri() {
 
 	//if ($_SERVER['REQUEST_URI'] == '/')

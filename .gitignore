@@ -1,5 +1,5 @@
 /phpmyadmin/
-setting-data.json
+conf.php
 
 #not vim caching file
 *~

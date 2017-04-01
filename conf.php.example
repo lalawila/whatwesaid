@@ -1,0 +1,10 @@
+<?php
+define("sql_hostname"    , "");
+define("sql_username", "");
+define("sql_password", "");
+define("sql_database", "");
+
+define("site_name"   , "whatwesaid.xyz");
+define("en_url"      , "https://en.whatwesaid.xyz");
+define("zh_url"      , "https://zh.whatwesaid.xyz");
+

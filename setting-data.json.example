@@ -1,8 +1,0 @@
-{
-	"MySql":{
-	"hostname" : "the host name your mysql in",
-	"username" : "your mysql username",
-	"password" : "your mysql password",
-	"database" : "your mysql table name"
-	}
-}
