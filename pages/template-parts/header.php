@@ -30,9 +30,9 @@
                                 global $user;
                         ?>
                             <li><a href="/people/<?php echo $user->data['ID'] ?>"><?php echo __('Hi,' ). $user->data['nick_name'];?></a></li>
-                            <li><a href="/login?action=logout&redirect_to=<?php echo $_SERVER['REDIRECT_URL'] ?>"><?php echo __('logout');?></a></li>
+                            <li><a href="/login?action=logout&redirect_to=<?php echo $_SERVER['REQUEST_URI'] ?>"><?php echo __('logout');?></a></li>
                         <?php else:?>
-                            <li><a href="/login?redirect_to=<?php echo $_SERVER['REDIRECT_URL'] ?>"><?php _e('Login');?></a></li>
+                            <li><a href="/login?redirect_to=<?php echo $_SERVER['REQUEST_URI'] ?>"><?php _e('Login');?></a></li>
                             <li><a href="/login?action=register"><?php _e('Sign up');?></a></li>
                         <?php endif; ?>
                     </ul>

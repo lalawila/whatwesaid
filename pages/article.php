@@ -1,12 +1,9 @@
 <?php get_header(); ?>
     <main id="main" class="site-main" role="main">
         <div  class="posts">
-		<?php
-		global $article;
-                $post=$article->get_article();
-                ?>
-                <h1 class="title"><?php echo $post['title']; ?></h1>
-                <div class="content"><?php echo $post['content']; ?></div>
+		<?php global $article; ?>
+                <h1 class="title"><?php echo $article->title; ?></h1>
+                <div class="content"><?php echo $article->content; ?></div>
                 <div class="comment-area">
                 
                     <form>

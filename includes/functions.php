@@ -42,7 +42,7 @@ function split_uri() {
         //return '404';
 
         $uri = null;
-        preg_match_all( '@(?:\/|)(.+?)(?:\/|\?)@', $_SERVER['REQUEST_URI'], $uri );
+        preg_match_all( '@\/([^\/\?]+)@', $_SERVER['REQUEST_URI'], $uri );
         return empty($uri[1]) ? ['home']: $uri[1];
 }
 function get_locale() {

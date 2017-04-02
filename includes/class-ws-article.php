@@ -2,50 +2,51 @@
 final class WS_Article {
     protected static $_instance = null;
     protected static $_article = null;
+    private $_is_article = false;
     private $sql = null;
-    public function __construct() {
-        $this->sql = $GLOBALS['wsdb'];
+    public function __construct( $db = Null ) {
+        global $splited_uri;
+
+        if (isset($db) && $db instanceof WS_DB)
+            $this->sql = $db;
+        else
+            $this->sql = $GLOBALS['wsdb'];
+
+        if( count($splited_uri) == 2 && $splited_uri[0] == "article" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
+            $this->_is_article = true;
+            $_article = $this->get_article( $splited_uri[1] );
+        }
+        
     }
 
     public function is_article() {
-	if ( isset($GLOBALS['page'] ))
-	    return $GLOBALS['page'] == 'page';		
-        $path = dirname($_SERVER['REQUEST_URI']);
-        if ($path == '/article') {
-            return true;
-        }
-        return false;
+        return $this->_is_article;
     }
     public function the_article() {
-        if (!$this->is_article())
-            return null;
-
-        $ex = explode("/", $_SERVER['REQUEST_URI']);
-        if (!is_null(self::$_article) && self::$_article['ID'] == $ex[2])
-            return self::$_article;
-        else {
-            return self::$_article = $this->get_article($ex[2]);
-        }
+        return $this->_article;
     }
-    public function the_ID() {
-        if (!$this->is_article())
-            return null;
-        return $this->the_article()['ID'];
+    
+    public function __get( $name ) {
+
+        echo $this->_is_article;
+        if(in_array( $name, ['title', 'content'])) 
+            return $this->_article[$this->_article['lang'] . '_' . $name];
+        if( in_array( $name, ["ID", "en_title", "en_content", "zh_title", "zh_content", "authors"]))
+            return $this->_article[$name];
+
     }
 
     public function get_article( $ID, $field = Null) {
-        if (!is_null(self::$_article) && self::$_article['ID'] == $ID)
-            return self::$_article;
 
         $article = $this->sql->get_results("
-    	SELECT ID, original, date, en, zh
+    	SELECT ID, lang,original, date, en_title, zh_title, en_content, zh_content
     	FROM articles
         WHERE ID=$ID
     	", ARRAY_A);
-        $article[0]['author'] = $this->get_author($ID);
+        $article[0]['author'] = $this->get_authors($ID);
         return $article[0];
     }
-    public function get_author($ID) {
+    public function get_authors($ID) {
 
         $author_ID = $this->sql->get_results("
     	SELECT author_ID
