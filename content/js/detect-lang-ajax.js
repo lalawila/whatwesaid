@@ -1,5 +1,11 @@
 var xmlhttp;
-window.onload = function() {
+if(document.all) {
+    window.attachEvent('onload', init_xmlhttp);
+}
+else {
+    window.addEventListener('click', init_xmlhttp, false);
+}
+function init_xmlhttp() {
 
 	if (window.XMLHttpRequest) {
 		xmlhttp = new XMLHttpRequest();
@@ -27,7 +33,7 @@ function on_text_change() {
 }
 
 function detect_lang(str) {
-	xmlhttp.open("POST","ajax.py",true);
+	xmlhttp.open("POST","detect.py",true);
 	xmlhttp.setRequestHeader("Content-type","text/plain; charset=UTF-8;");
 	xmlhttp.send(str);
 }

@@ -1,7 +1,6 @@
 <?php
 final class WS_Article {
-    protected static $_instance = null;
-    protected static $_article = null;
+    protected $_article = null;
     private $_is_article = false;
     private $sql = null;
     public function __construct( $db = Null ) {
@@ -14,7 +13,7 @@ final class WS_Article {
 
         if( count($splited_uri) == 2 && $splited_uri[0] == "article" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
             $this->_is_article = true;
-            $_article = $this->get_article( $splited_uri[1] );
+            $this->_article = $this->get_article( $splited_uri[1] );
         }
         
     }
@@ -28,7 +27,6 @@ final class WS_Article {
     
     public function __get( $name ) {
 
-        echo $this->_is_article;
         if(in_array( $name, ['title', 'content'])) 
             return $this->_article[$this->_article['lang'] . '_' . $name];
         if( in_array( $name, ["ID", "en_title", "en_content", "zh_title", "zh_content", "authors"]))
@@ -37,7 +35,6 @@ final class WS_Article {
     }
 
     public function get_article( $ID, $field = Null) {
-
         $article = $this->sql->get_results("
     	SELECT ID, lang,original, date, en_title, zh_title, en_content, zh_content
     	FROM articles
