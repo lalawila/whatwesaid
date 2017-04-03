@@ -6,7 +6,8 @@ if (!defined('ABSPATH')) {
 }
 
 if($_SERVER['REQUEST_URI'] == '/deploy.php'):
-require (ABSPATH . 'deploy.php');
+    require (ABSPATH . 'deploy.php');
+    exit();
 endif;
 
 require_once (ABSPATH . 'setting.php');
