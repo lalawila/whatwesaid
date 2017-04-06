@@ -4,4 +4,4 @@
 <?php echo site_name; ?>
 </div>
 </footer>
-
+</body>

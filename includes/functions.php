@@ -6,10 +6,10 @@ function get_header( ) {
 }
 function get_site_url() {
     if (get_locale() == 'en'){
-        return SITE_EN;
+        return en_url;
     }
     elseif (get_locale() == 'zh') {
-        return SITE_ZH;
+        return zh_url;
     }
     
     return false;
@@ -21,6 +21,9 @@ function load_style( $style = 'style.css' ) {
 }
 function load_script( $script ) {
 	printf('<script src="%s" type="text/javascript"></script>', '/content/js/' . $script);
+}
+function load_ckeditor() {
+    echo '<script src="/content/ckeditor/ckeditor.js"></script>';
 }
 function page_404() {
     require_once (ABSPATH . 'pages/404.php');

@@ -81,7 +81,7 @@ class WS_User {
             $new_user = WS_User::instance(['name'=>$_POST['log'],'pwd' => $_POST['pwd']]);
             
         if($new_user){
-            setcookie('logined',$new_user->data['user_login'] . '|' . password_hash($new_user->data['user_pass'], PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/','whatwesaid.xyz' );
+            setcookie('logined',$new_user->data['user_login'] . '|' . password_hash($new_user->data['user_pass'], PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', site_name );
             $user = $new_user;
         }
         return $user;
@@ -93,7 +93,7 @@ class WS_User {
             unset($GLOBALS['user']);
 
             unset($_COOKIE['logined']);
-            setcookie('logined', null, -1, '/', 'whatwesaid.xyz');
+            setcookie('logined', null, -1, '/', site_name);
             
             return true;
         }

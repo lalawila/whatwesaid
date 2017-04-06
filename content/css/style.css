@@ -121,7 +121,64 @@
 /**
  *  4.0 - submit article
  */
-.sumbit-article-form {
+.submit-article-form {
    display: flex;
    flex-direction: column; 
+}
+.submit-article input{
+    line-height: 2em;
+}
+.submit-article .language p{
+    line-height: 2em;
+    margin: 0;
+}
+.submit-article .language {
+    display: flex;
+}
+.submit-article .language-submit{
+    display: flex;
+    justify-content: space-between;
+    width:100%;
+}
+.submit-article select {
+    -moz-appearance: none;
+    -webkit-appearance:none;
+    appearance:none;  
+    margin-left:1em;
+}
+/**
+ * 5.0 - login
+ */
+
+.login-body { 
+    display: flex;
+    justify-content: center;
+}
+.login {
+    display: flex;
+    width: 300px;
+    height: 300px;
+    margin-top: 30px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.login input {
+    border: 0;
+    padding: 1em 0.8em;
+    background: white;
+    box-shadow: none;
+    font-size: 100%;
+    width: 100%;
+}
+.login input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #fff inset;
+    -webkit-text-fill-color: #555;
+}
+
+.group-inputs {
+    border: 1px solid #d5d5d5;
+}
+.bottom-line{
+    border-bottom: 1px solid #d5d5d5;
 }
