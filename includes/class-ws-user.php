@@ -1,5 +1,43 @@
 <?php
 class WS_User {
+    
+    protected $user;
+    private $_db;
+
+    public function __construct( $user, $db = Null ) {
+        $this->user = $user;
+        if( isset($db) && $db instanceof WS_DB)
+            $this->_db = $db;
+        else
+            $this->_db = $GLOBALS['wsdb']; 
+    }
+
+    public function __get ( $name ) {
+        return $user->$name;   
+    }
+    
+    public function change_password( $new_password ){
+        
+
+    }
+
+    public function send_letter( $to, $content ) {
+    
+    
+    }
+
+    public function get_status(  ) {
+
+
+    }
+
+    public function chang_avatar( ) {
+    
+    }
+}
+
+
+final class WS_UserManage {
     /**
      *$data['ID']
      *$data['user_login']
@@ -8,13 +46,31 @@ class WS_User {
      *$data['user_email']
      *$data['user_status']
     **/
-    public $data;
-    private function __construct($user_data) {
-        $this->data = $user_data;
+    private $_loged_user = null;
+    private $_page_user  = null;
+    private $_db = null;
+    private $has_logined = false;
+
+    private static $_single = null;
+
+    private function __construct($db = null ) {
+        if( isset($db) && $db instanceof WS_DB)
+            $this->_db = $db;
+        else
+            $this->_db = $GLOBALS['wsdb']; 
+    
     }
-    public static function instance($user = [ 'name' => '', 'email' => '', 'pwd' => '']) {
-        global $wsdb;
-        $u_data = WS_User::get_user_data($user);
+    public function __get( $nume ) {
+
+        return $this->$name;
+    }
+    public static function instance( $db = null ) {
+        return isset(WS_UserManage::$_single) ? WS_UserManage::$_single : new WS_UserManage( $db );
+    
+    }
+
+    public function get_user($user = [ 'name' => '', 'email' => '', 'pwd' => '']) {
+        $u_data = $this->get_user_data($user);
 
         if(!$u_data ){
             WS_Error::add_error( __('This username is invalid.'));
@@ -27,58 +83,56 @@ class WS_User {
         }
         return new WS_User($u_data);
     }
-    public static function get_user_data($user = [ 'name' => '', 'email' => '', 'ID' => '']) {
-        global $wsdb;
+    public function get_user_data($user = [ 'name' => '', 'email' => '', 'ID' => '']) {
         $u_data = false;
         if (!empty($user['name'])){
-            $u_data = $wsdb->get_row( $wsdb->prepare(
+            $u_data = $this->_db->get_row( $wsdb->prepare(
 			"SELECT * FROM users WHERE user_login = %s", $user['name']
-		  ), ARRAY_A );
+		  ) );
         }
         elseif (!empty($user['email'])){
-            $u_data = $wsdb->get_row( $wsdb->prepare(
+            $u_data = $this->_db->get_row( $wsdb->prepare(
 			"SELECT * FROM users WHERE user_email = %s", $user['email']
-		  ), ARRAY_A );
+		  ) );
         }
         elseif (!empty($user['ID'])){
-            $u_data = $wsdb->get_row( $wsdb->prepare(
+            $u_data = $this->_db->get_row( $wsdb->prepare(
 			"SELECT * FROM users WHERE ID = %s", $user['ID']
-		  ), ARRAY_A );
+		  ) );
         }
         return $u_data;
     }
-    public static function check_login() {
-        global $user;
-        global $wsdb;
+    public function check_login() {
 
-        if (isset($user))
-            return $user;
+        $this->has_logined = true;
+        if (isset($this->_loged_user))
+            return $this->loged_user;
 
         if (isset($_COOKIE["logined"])){
             $l_name = strstr($_COOKIE["logined"],'|',true);
-            if (WS_User::validate_username($l_name)){
-                $u_data = $wsdb->get_row( $wsdb->prepare(
+            if ($this->validate_username($l_name)){
+                $user = $this->_db->get_row( $this->_db->prepare(
     			"SELECT * FROM users WHERE user_login = %s", $l_name
                 ), ARRAY_A );
 
-                if ($u_data && password_verify ($u_data['user_pass'], substr(strstr($_COOKIE["logined"],'|',false), 1))){
-                    $user =  new WS_User($u_data);
+                if ($user && password_verify ($user ['user_pass'], substr(strstr($_COOKIE["logined"],'|',false), 1))){
+                    $this->_loged_user =  new WS_User($user);
                     return $user;
                 }
             }
         }
+        $this->has_logined = false;
         return false;
     }
-    public static function login() {
-        global $user;
+    public function login() {
         
         if (empty($_POST['log']) || empty($_POST['pwd']))
             return false;
             
-        if (WS_User::is_email($_POST['log']))
-            $new_user = WS_User::instance(['email'=>$_POST['log'],'pwd' => $_POST['pwd']]);
+        if ($this->is_email($_POST['log']))
+            $new_user = $this->instance(['email'=>$_POST['log'],'pwd' => $_POST['pwd']]);
         else
-            $new_user = WS_User::instance(['name'=>$_POST['log'],'pwd' => $_POST['pwd']]);
+            $new_user = $this->instance(['name'=>$_POST['log'],'pwd' => $_POST['pwd']]);
             
         if($new_user){
             setcookie('logined',$new_user->data['user_login'] . '|' . password_hash($new_user->data['user_pass'], PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', site_name );
@@ -86,7 +140,7 @@ class WS_User {
         }
         return $user;
     }
-    public static function logout() {
+    public function logout() {
         global $user;
         if (isset($user)){
 
@@ -99,36 +153,36 @@ class WS_User {
         }
         return false;   
     }    
-    public static function get_current_user() {
+    public function get_current_user() {
 
-        return WS_User::check_login();
+        return $this->check_login();
     }
-    public static function username_exists( $name ) {
+    public function username_exists( $name ) {
     	global $wsdb;
         $ID = $wsdb->get_row( $wsdb->prepare(
 			"SELECT ID FROM users WHERE user_login = %s", $name
 		  ), ARRAY_A );
         return $ID;
     }
-    public static function email_exists( $email ) {
+    public function email_exists( $email ) {
     	global $wsdb;
         $ID = $wsdb->get_row( $wsdb->prepare(
 			"SELECT ID FROM users WHERE user_email = %s", $email
 		  ), ARRAY_A );
         return $ID;
     }
-    public static function register() {
+    public function register() {
         if (empty($_POST['email']) ||empty($_POST['name']) || empty($_POST['pwd']) )
             return false;
-        $sanitized_user_login = WS_User::sanitize_user($_POST['name']);
+        $sanitized_user_login = $this->sanitize_user($_POST['name']);
 
         // Check the username
         if ($sanitized_user_login == '') {
             WS_Error::add_error(__('Please enter a username.'));
-        } elseif (!WS_User::validate_username($_POST['name'])) {
+        } elseif (!$this->validate_username($_POST['name'])) {
             WS_Error::add_error( __('This username is invalid because it uses illegal characters. Please enter a valid username.'));
             $sanitized_user_login = '';
-        } elseif (WS_User::username_exists($sanitized_user_login)) {
+        } elseif ($this->username_exists($sanitized_user_login)) {
             WS_Error::add_error(__('This username is already registered. Please choose another one.'));
 
         }
@@ -138,16 +192,16 @@ class WS_User {
         // Check the email address
         if ($user_email == '') {
             WS_Error::add_error( __('Please type your email address.'));
-        } elseif (!WS_User::is_email($user_email)) {
+        } elseif (!$this->is_email($user_email)) {
             WS_Error::add_error(__('The email address isn&#8217;t correct.'));
             $user_email = '';
-        } elseif (WS_User::email_exists($user_email)) {
+        } elseif ($this->email_exists($user_email)) {
             WS_Error::add_error(__('This email is already registered, please choose another one.'));
         }
         
         
         
-        $user_id = WS_User::create_user($sanitized_user_login, $_POST['pwd'], $user_email);
+        $user_id = $this->create_user($sanitized_user_login, $_POST['pwd'], $user_email);
         if (!$user_id) {
             WS_Error::add_error('registerfail');
             return false;
@@ -156,26 +210,26 @@ class WS_User {
 
         return $user_id;
     }
-    public static function is_email ( $email ) {
+    public function is_email ( $email ) {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
-    public static function create_user($username, $password, $email) {
+    public function create_user($username, $password, $email) {
         $user_login = addslashes($username);
         $user_email = addslashes($email);
         $user_pass = $password;
 
         $userdata = compact('user_login', 'user_email', 'user_pass');
-        return WS_User::insert_user($userdata);
+        return $this->insert_user($userdata);
     }
 
-    public static function validate_username($username) {
-        $sanitized = WS_User::sanitize_user($username, true);
+    public function validate_username($username) {
+        $sanitized = $this->sanitize_user($username, true);
         $valid = ($sanitized == $username && !empty($sanitized));
 
         return $valid;
     }
 
-    public static function insert_user($userdata) {
+    public function insert_user($userdata) {
         global $wsdb;
 
         if ($userdata instanceof stdClass) {
@@ -186,7 +240,7 @@ class WS_User {
         if (!empty($userdata['ID'])) {
             $ID = (int)$userdata['ID'];
             $update = true;
-            $old_user_data = WS_User::get_user_data(['ID' => $ID]);
+            $old_user_data = $this->get_user_data(['ID' => $ID]);
 
             if (!$old_user_data) {
                 WS_Error::add_error(__('Invalid user ID.'));
@@ -202,7 +256,7 @@ class WS_User {
             $user_pass = password_hash($userdata['user_pass'], PASSWORD_DEFAULT );
         }
 
-        $sanitized_user_login = WS_User::sanitize_user($userdata['user_login'], true);
+        $sanitized_user_login = $this->sanitize_user($userdata['user_login'], true);
         $user_login = trim($sanitized_user_login);
 
         // user_login must be between 0 and 60 characters.
@@ -214,7 +268,7 @@ class WS_User {
             return false;
         }
 
-        if (!$update && WS_User::username_exists($user_login)) {
+        if (!$update && $this->username_exists($user_login)) {
             WS_Error::add_error( __('Sorry, that username already exists!'));
             return false;
         }
@@ -224,7 +278,7 @@ class WS_User {
         * Otherwise build a nicename from the user_login.
         */
         if (!empty($userdata['nick_name'])) {
-            $nick_name = WS_User::sanitize_user($userdata['nick_name'], true);
+            $nick_name = $this->sanitize_user($userdata['nick_name'], true);
             if (mb_strlen($nick_name) > 50) {
                 WS_Error::add_error(__('Nicename may not be longer than 50 characters.'));
                 return false;
@@ -246,7 +300,7 @@ class WS_User {
         * accordingly.
         */
         if ((!$update || (!empty($old_user_data) && 0 !== strcasecmp($userdata['user_email'], $old_user_data->
-            user_email))) && WS_User::email_exists($userdata['user_email'])) {
+            user_email))) && $this->email_exists($userdata['user_email'])) {
             WS_Error::add_error('Sorry, that email address is already used!');
             return false;
         }
@@ -281,9 +335,9 @@ class WS_User {
      * @param bool   $strict   If set limits $username to specific characters. Default false.
      * @return string The sanitized username, after passing through filters.
      */
-    public static function sanitize_user($username, $strict = false) {
+    public function sanitize_user($username, $strict = false) {
         $raw_username = $username;
-        $username = WS_User::strip_all_tags($username);
+        $username = $this->strip_all_tags($username);
         $username = remove_accents($username);
         // Kill octets
         $username = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $username);
@@ -311,7 +365,7 @@ class WS_User {
      * @param bool   $remove_breaks Optional. Whether to remove left over line breaks and white space chars
      * @return string The processed string.
      */
-    public static function strip_all_tags($string, $remove_breaks = false) {
+    public function strip_all_tags($string, $remove_breaks = false) {
         $string = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $string);
         $string = strip_tags($string);
 

@@ -1,3 +1,4 @@
+<?php global $user ?>
 <!DOCTYPE html>
 <html lang="<?php echo get_lang() ?>" class="no-js">
 <head>
@@ -24,10 +25,10 @@
                     </ul>
                     <ul id="menu-user" class="menu">
                         <?php 
-                            if(WS_User::check_login()): 
+                            if($user->has_logined): 
                                 global $user;
                         ?>
-                            <li><a href="/people/<?php echo $user->data['ID'] ?>"><?php echo __('Hi,' ). $user->data['nick_name'];?></a></li>
+                            <li><a href="/people/<?php echo $user->_loged_user->ID ?>"><?php echo __('Hi,' ). $user->_loged_user->nick_name ?></a></li>
                             <li><a href="/login?action=logout&redirect_to=<?php echo base64_encode($_SERVER['REQUEST_URI']) ?>"><?php echo __('logout');?></a></li>
                         <?php else:?>
                             <li><a href="/login?redirect_to=<?php echo base64_encode($_SERVER['REQUEST_URI']) ?>"><?php _e('Login');?></a></li>

@@ -1,15 +1,15 @@
 <?php
 final class WS_Article {
-    protected $_article = null;
+    private $_article = null;
     private $_is_article = false;
-    private $sql = null;
+    private $_sql = null;
     public function __construct( $db = Null ) {
         global $splited_uri;
 
         if (isset($db) && $db instanceof WS_DB)
-            $this->sql = $db;
+            $this->_sql = $db;
         else
-            $this->sql = $GLOBALS['wsdb'];
+            $this->_sql = $GLOBALS['wsdb'];
 
         if( count($splited_uri) == 2 && $splited_uri[0] == "article" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
             $this->_is_article = true;
@@ -35,7 +35,7 @@ final class WS_Article {
     }
 
     public function get_article( $ID, $field = Null) {
-        $article = $this->sql->get_results("
+        $article = $this->_sql->get_results("
     	SELECT ID, lang,original, date, en_title, zh_title, en_content, zh_content
     	FROM articles
         WHERE ID=$ID
@@ -45,7 +45,7 @@ final class WS_Article {
     }
     public function get_authors($ID) {
 
-        $author_ID = $this->sql->get_results("
+        $author_ID = $this->_sql->get_results("
     	SELECT author_ID
     	FROM term_rel
         WHERE article_ID=$ID
@@ -54,7 +54,7 @@ final class WS_Article {
         $i = 0;
         foreach ($author_ID as $s_id) {
             $t = $s_id['author_ID'];
-            $authors[$i] = $this->sql->get_results("
+            $authors[$i] = $this->_sql->get_results("
     	   SELECT ID, name
     	   FROM author
            WHERE ID=$t
@@ -68,7 +68,7 @@ final class WS_Article {
 	$title   = $lang . '_title';
 	$content = $lang . '_content';
 	if( $lang == "ori" ):	
-        	$ats_temp = $this->sql->get_results("
+        	$ats_temp = $this->_sql->get_results("
     		SELECT ID, lang, date, en_title, en_content, zh_title, zh_content
     		FROM articles
 		order by ID desc limit $num
@@ -83,7 +83,7 @@ final class WS_Article {
 			$articles[] = $at;
 		} 
 	else:
-        	$articles = $this->sql->get_results("
+        	$articles = $this->_sql->get_results("
     		SELECT ID, lang, date, $ltitle,$content 
     		FROM articles
 		WHERE lang=$lang
@@ -95,7 +95,7 @@ final class WS_Article {
 
     public function get_post($lang, $ID) {
         $tablename = $lang . '_posts';
-        $en_post = $this->sql->get_results("
+        $en_post = $this->_sql->get_results("
     	SELECT ID, article_ID, post_title, post_content
     	FROM $tablename
         WHERE ID=$ID

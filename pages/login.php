@@ -1,4 +1,6 @@
 <?php
+global $user;
+
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : 'login';
 $redirect_to = isset($_REQUEST['redirect_to']) ? base64_decode($_REQUEST['redirect_to']) : '/';
 
@@ -12,7 +14,7 @@ load_style();
 switch ($action) {
     case 'login' :
         WS_Error::reset();
-        if(WS_User::login()){
+        if($user->login()){
             header("Location: $redirect_to", true, '303');
             exit();
         }
@@ -33,13 +35,13 @@ switch ($action) {
 <?php
         break;
     case 'logout' :
-	    if(WS_User::logout()){
+	    if($user->logout()){
            header("Location: $redirect_to", true, '303');
         }
 	    exit();
      case 'register' :
         WS_Error::reset();
-        if(WS_User::register()){
+        if($user->register()){
            header("Location: $redirect_to", true, '303');
            exit();
         }

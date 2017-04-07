@@ -5,6 +5,14 @@ define('object', 'OBJECT');
 define('OBJECT_K', 'OBJECT_K');
 define('ARRAY_A', 'ARRAY_A');
 define('ARRAY_N', 'ARRAY_N');
+/**
+ * object   rows[n] = class{ a = 1, b = 2 }
+ * object_k rows[a] = class{ a = 1, b = 2 }
+ * array_a  rows[n] = [ a => 1, b => 2 ]
+ * array_n  rows[n] = [ 1, 2 ]
+ *
+ */
+
 
 class WS_DB {
     protected $dbuser;
@@ -16,12 +24,16 @@ class WS_DB {
     private $checking_collation = false;
     private $ready = false;
     protected $check_current_query = true;
-    public $debug = false;
 
     private $last_result;
     private $last_error;
     protected $result;
+    
+    protected $num_rows;
+    protected $rows_affected;
+    protected $insert_id;
 
+    protected $reconnect_retries = 5;
     protected $col_meta = array();
 
     public $charset = 'utf8mb4';
@@ -39,6 +51,9 @@ class WS_DB {
 
     public function __destruct() {
         return true;
+    }
+    public function __get( $name ) {
+        return $this->$name;
     }
 
     public function db_connect() {
@@ -61,19 +76,14 @@ class WS_DB {
                 $socket = $port_or_socket;
             }
         }
-        if ($this->debug) {
-            mysqli_real_connect($this->dbh, $host, $this->dbuser, $this->dbpassword, null, $port,
-                $socket, 0);
-        } else {
-            @mysqli_real_connect($this->dbh, $host, $this->dbuser, $this->dbpassword, null,
-                $port, $socket, 0);
-        }
-
+        @mysqli_real_connect($this->dbh, $host, $this->dbuser, $this->dbpassword, null, $port, $socket, 0);
         if ($this->dbh->connect_errno) {
             $this->dbh = null;
         }
 
         if ($this->dbh) {
+
+            $this->init_charset();
 
             $this->has_connected = true;
 
@@ -134,6 +144,8 @@ class WS_DB {
             $dbh = $this->dbh;
         $success = mysqli_select_db($dbh, $db);
 
+        if(!$success) 
+            $this->ready = false;
     }
 
     public function get_results($query = null, $output = object) {
@@ -203,9 +215,6 @@ class WS_DB {
         }
         $this->check_current_query = true;
 
-        // Keep track of the last query for debug.
-        $this->last_query = $query;
-
         $this->_do_query($query);
 
         // MySQL server has gone away, try to reconnect.
@@ -221,9 +230,10 @@ class WS_DB {
         }
 
         if (empty($this->dbh) || 2006 == $mysql_errno) {
-            if ($this->check_connection()) {
-                $this->_do_query($query);
-            } else {
+            if( $this->check_connection()) {
+                $this->_do_query( $query );
+            
+            } else{
                 $this->insert_id = 0;
                 return false;
             }
@@ -232,16 +242,13 @@ class WS_DB {
         // If there is an error then take note of it.
         if ($this->dbh instanceof mysqli) {
             $this->last_error = mysqli_error($this->dbh);
-        } else {
-            $this->last_error = 'Unable to retrieve the error message from MySQL';
-        }
+        } 
 
         if ($this->last_error) {
             // Clear insert_id on a subsequent failed insert.
             if ($this->insert_id && preg_match('/^\s*(insert|replace)\s/i', $query))
                 $this->insert_id = 0;
 
-            //$this->print_error();
             return false;
         }
 
@@ -271,6 +278,25 @@ class WS_DB {
 
         return $return_val;
     }
+	public function check_connection( ) {
+		if ( ! empty( $this->dbh ) && mysqli_ping( $this->dbh ) ) {
+			return true;
+		}
+
+		$error_reporting = false;
+
+		for ( $tries = 1; $tries <= $this->reconnect_retries; $tries++ ) {
+
+			if ( $this->db_connect( ) ) {
+
+				return true;
+			}
+
+			sleep( 1 );
+        }
+    }
+
+
 
     private function _do_query($query) {
         if (!empty($this->dbh)) {
@@ -319,6 +345,9 @@ class WS_DB {
         return false;
     }
 
+    /*
+     * Check if the query is accessing a collation considered safe on the current version of MySQL
+     */
     protected function check_safe_collation($query) {
         if ($this->checking_collation) {
             return true;
@@ -371,7 +400,62 @@ class WS_DB {
 
         return true;
     }
+    protected function get_table_from_query( $query ) {
+		// Remove characters that can legally trail the table name.
+		$query = rtrim( $query, ';/-#' );
 
+		// Allow (select...) union [...] style queries. Use the first query's table name.
+		$query = ltrim( $query, "\r\n\t (" );
+
+		// Strip everything between parentheses except nested selects.
+		$query = preg_replace( '/\((?!\s*select)[^(]*?\)/is', '()', $query );
+
+		// Quickly match most common queries.
+		if ( preg_match( '/^\s*(?:'
+				. 'SELECT.*?\s+FROM'
+				. '|INSERT(?:\s+LOW_PRIORITY|\s+DELAYED|\s+HIGH_PRIORITY)?(?:\s+IGNORE)?(?:\s+INTO)?'
+				. '|REPLACE(?:\s+LOW_PRIORITY|\s+DELAYED)?(?:\s+INTO)?'
+				. '|UPDATE(?:\s+LOW_PRIORITY)?(?:\s+IGNORE)?'
+				. '|DELETE(?:\s+LOW_PRIORITY|\s+QUICK|\s+IGNORE)*(?:.+?FROM)?'
+				. ')\s+((?:[0-9a-zA-Z$_.`-]|[\xC2-\xDF][\x80-\xBF])+)/is', $query, $maybe ) ) {
+			return str_replace( '`', '', $maybe[1] );
+		}
+
+		// SHOW TABLE STATUS and SHOW TABLES WHERE Name = 'wp_posts'
+		if ( preg_match( '/^\s*SHOW\s+(?:TABLE\s+STATUS|(?:FULL\s+)?TABLES).+WHERE\s+Name\s*=\s*("|\')((?:[0-9a-zA-Z$_.-]|[\xC2-\xDF][\x80-\xBF])+)\\1/is', $query, $maybe ) ) {
+			return $maybe[2];
+		}
+
+		// SHOW TABLE STATUS LIKE and SHOW TABLES LIKE 'wp\_123\_%'
+		// This quoted LIKE operand seldom holds a full table name.
+		// It is usually a pattern for matching a prefix so we just
+		// strip the trailing % and unescape the _ to get 'wp_123_'
+		// which drop-ins can use for routing these SQL statements.
+		if ( preg_match( '/^\s*SHOW\s+(?:TABLE\s+STATUS|(?:FULL\s+)?TABLES)\s+(?:WHERE\s+Name\s+)?LIKE\s*("|\')((?:[\\\\0-9a-zA-Z$_.-]|[\xC2-\xDF][\x80-\xBF])+)%?\\1/is', $query, $maybe ) ) {
+			return str_replace( '\\_', '_', $maybe[2] );
+		}
+
+		// Big pattern for the rest of the table-related queries.
+		if ( preg_match( '/^\s*(?:'
+				. '(?:EXPLAIN\s+(?:EXTENDED\s+)?)?SELECT.*?\s+FROM'
+				. '|DESCRIBE|DESC|EXPLAIN|HANDLER'
+				. '|(?:LOCK|UNLOCK)\s+TABLE(?:S)?'
+				. '|(?:RENAME|OPTIMIZE|BACKUP|RESTORE|CHECK|CHECKSUM|ANALYZE|REPAIR).*\s+TABLE'
+				. '|TRUNCATE(?:\s+TABLE)?'
+				. '|CREATE(?:\s+TEMPORARY)?\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?'
+				. '|ALTER(?:\s+IGNORE)?\s+TABLE'
+				. '|DROP\s+TABLE(?:\s+IF\s+EXISTS)?'
+				. '|CREATE(?:\s+\w+)?\s+INDEX.*\s+ON'
+				. '|DROP\s+INDEX.*\s+ON'
+				. '|LOAD\s+DATA.*INFILE.*INTO\s+TABLE'
+				. '|(?:GRANT|REVOKE).*ON\s+TABLE'
+				. '|SHOW\s+(?:.*FROM|.*TABLE)'
+				. ')\s+\(*\s*((?:[0-9a-zA-Z$_.`-]|[\xC2-\xDF][\x80-\xBF])+)\s*\)*/is', $query, $maybe ) ) {
+			return str_replace( '`', '', $maybe[1] );
+		}
+
+		return false;
+	}
     public function close() {
         if (!$this->dbh) {
             return false;
@@ -391,6 +475,10 @@ class WS_DB {
 
         return $closed;
     }
+
+    /**
+     * Set $this->charset and $this->collate
+     */
     public function init_charset() {
         $charset = '';
         $collate = '';
@@ -408,6 +496,40 @@ class WS_DB {
         $this->charset = $charset_collate['charset'];
         $this->collate = $charset_collate['collate'];
     }
+    /**
+     * Determines the best charset and collation to use given a charset and collation,
+     */
+    public function determine_charset( $charset, $collate ) {
+		if ( empty( $this->dbh ) ) {
+			return compact( 'charset', 'collate' );
+		}
+
+		if ( 'utf8' === $charset && $this->has_cap( 'utf8mb4' ) ) {
+			$charset = 'utf8mb4';
+		}
+
+		if ( 'utf8mb4' === $charset && ! $this->has_cap( 'utf8mb4' ) ) {
+			$charset = 'utf8';
+			$collate = str_replace( 'utf8mb4_', 'utf8_', $collate );
+		}
+
+		if ( 'utf8mb4' === $charset ) {
+			// _general_ is outdated, so we can upgrade it to _unicode_, instead.
+			if ( ! $collate || 'utf8_general_ci' === $collate ) {
+				$collate = 'utf8mb4_unicode_ci';
+			} else {
+				$collate = str_replace( 'utf8_', 'utf8mb4_', $collate );
+			}
+		}
+
+		// _unicode_520_ is a better collation, we should use that when it's available.
+		if ( $this->has_cap( 'utf8mb4_520' ) && 'utf8mb4_unicode_ci' === $collate ) {
+			$collate = 'utf8mb4_unicode_520_ci';
+		}
+
+		return compact( 'charset', 'collate' );
+	}
+
     public function set_sql_mode($modes = array()) {
         if (empty($modes)) {
             $res = mysqli_query($this->dbh, 'SELECT @@SESSION.sql_mode');
@@ -431,29 +553,15 @@ class WS_DB {
 
         $modes = array_change_key_case($modes, CASE_UPPER);
 
-        /**
-         * Filters the list of incompatible SQL modes to exclude.
-         *
-         * @since 3.9.0
-         *
-         * @param array $incompatible_modes An array of incompatible modes.
-         */
-        $incompatible_modes = (array )apply_filters('incompatible_sql_modes', $this->
-            incompatible_modes);
-
-        foreach ($modes as $i => $mode) {
-            if (in_array($mode, $incompatible_modes)) {
-                unset($modes[$i]);
-            }
-        }
+        //foreach ($modes as $i => $mode) {
+        //    if (in_array($mode, $this->incompatible_imodes)) {
+        //        unset($modes[$i]);
+        //    }
+        //}
 
         $modes_str = implode(',', $modes);
 
-        if ($this->use_mysqli) {
-            mysqli_query($this->dbh, "SET SESSION sql_mode='$modes_str'");
-        } else {
-            mysql_query("SET SESSION sql_mode='$modes_str'", $this->dbh);
-        }
+        mysqli_query($this->dbh, "SET SESSION sql_mode='$modes_str'");
     }
     //@param int         $y      Optional. Row to return. Indexed from 0.
     public function get_row( $query = null, $output = OBJECT, $y = 0 ) {

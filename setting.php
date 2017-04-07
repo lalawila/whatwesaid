@@ -39,10 +39,11 @@
     $GLOBALS['splited_uri'] = split_uri();
     $GLOBALS['wsdb'] = new WS_DB(sql_username, sql_password, sql_database, sql_hostname);
     $GLOBALS['article'] = new WS_Article;
+    $GLOBALS['user'] = WS_UserManage::instance();
     $GLOBALS['wws'] = new WWS;
 
     date_default_timezone_set('UTC'); 
-    WS_User::check_login();
+    $GLOBALS['user']->check_login();
     
 
     
