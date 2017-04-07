@@ -38,7 +38,7 @@
 
     $GLOBALS['splited_uri'] = split_uri();
     $GLOBALS['wsdb'] = new WS_DB(sql_username, sql_password, sql_database, sql_hostname);
-    $GLOBALS['article'] = new WS_Article;
+    $GLOBALS['article'] = WS_ArticleManage::instance();
     $GLOBALS['user'] = WS_UserManage::instance();
     $GLOBALS['wws'] = new WWS;
 

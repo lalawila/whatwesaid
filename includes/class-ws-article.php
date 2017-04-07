@@ -1,15 +1,37 @@
 <?php
-final class WS_Article {
-    private $_article = null;
+class WS_Article {
+
+    protected $article;
+    private $_db;
+
+    public function __construct( $article, $db = Null ) {
+        $this->article = $article;
+        if( isset($db) && $db instanceof WS_DB)
+            $this->_db = $db;
+        else
+            $this->_db = $GLOBALS['wsdb'];
+    }
+    public function __get( $name ) {
+        if (in_array( $name, ['title', 'content']))
+            return $article[ $article['lang'] . '_' . $name ];
+        else
+            return $article[$name];
+    
+    }
+
+}
+final class WS_ArticleManage {
+    private $_page_article = null;
     private $_is_article = false;
-    private $_sql = null;
+    private $_db = null;
+    private static $_single = null;
     public function __construct( $db = Null ) {
         global $splited_uri;
 
         if (isset($db) && $db instanceof WS_DB)
-            $this->_sql = $db;
+            $this->_db = $db;
         else
-            $this->_sql = $GLOBALS['wsdb'];
+            $this->_db = $GLOBALS['wsdb'];
 
         if( count($splited_uri) == 2 && $splited_uri[0] == "article" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
             $this->_is_article = true;
@@ -18,25 +40,26 @@ final class WS_Article {
         
     }
 
+    public static function instance( $db = null ) {
+        return isset(WS_ArticleManage::$_single) ? WS_ArticleManage::$_single : new WS_ArticleManage( $db );
+
+    }
+
     public function is_article() {
         return $this->_is_article;
     }
     public function the_article() {
-        return $this->_article;
+        return $this->_page_article;
     }
     
     public function __get( $name ) {
-
-        if(in_array( $name, ['title', 'content'])) 
-            return $this->_article[$this->_article['lang'] . '_' . $name];
-        if( in_array( $name, ["ID", "en_title", "en_content", "zh_title", "zh_content", "authors"]))
-            return $this->_article[$name];
-
+            return $this->_page_article-> $name;
     }
 
     public function get_article( $ID, $field = Null) {
-        $article = $this->_sql->get_results("
-    	SELECT ID, lang,original, date, en_title, zh_title, en_content, zh_content
+        $field = isset($field) ? $field : '*';
+        $article = $this->_db->get_row("
+    	SELECT $field
     	FROM articles
         WHERE ID=$ID
     	", ARRAY_A);
@@ -45,7 +68,7 @@ final class WS_Article {
     }
     public function get_authors($ID) {
 
-        $author_ID = $this->_sql->get_results("
+        $author_ID = $this->_db->get_results("
     	SELECT author_ID
     	FROM term_rel
         WHERE article_ID=$ID
@@ -54,7 +77,7 @@ final class WS_Article {
         $i = 0;
         foreach ($author_ID as $s_id) {
             $t = $s_id['author_ID'];
-            $authors[$i] = $this->_sql->get_results("
+            $authors[$i] = $this->_db->get_results("
     	   SELECT ID, name
     	   FROM author
            WHERE ID=$t
@@ -68,7 +91,7 @@ final class WS_Article {
 	$title   = $lang . '_title';
 	$content = $lang . '_content';
 	if( $lang == "ori" ):	
-        	$ats_temp = $this->_sql->get_results("
+        	$ats_temp = $this->_db->get_results("
     		SELECT ID, lang, date, en_title, en_content, zh_title, zh_content
     		FROM articles
 		order by ID desc limit $num
@@ -83,7 +106,7 @@ final class WS_Article {
 			$articles[] = $at;
 		} 
 	else:
-        	$articles = $this->_sql->get_results("
+        	$articles = $this->_db->get_results("
     		SELECT ID, lang, date, $ltitle,$content 
     		FROM articles
 		WHERE lang=$lang
@@ -95,7 +118,7 @@ final class WS_Article {
 
     public function get_post($lang, $ID) {
         $tablename = $lang . '_posts';
-        $en_post = $this->_sql->get_results("
+        $en_post = $this->_db->get_results("
     	SELECT ID, article_ID, post_title, post_content
     	FROM $tablename
         WHERE ID=$ID

@@ -1,18 +1,20 @@
 <?php
+global $article;
+$en = null;
+$zh = null;
 if ($GLOBALS['lang'] == 'zh'){
     $zh='selected';
 }
 else{
     $en='selected';
 }
-global $article;
 ?>
 <div id="secondary" class="siderbar" role="complementary">
 	
 <form>
 <select class="language" name="language" onchange="window.location.href=this.options[selectedIndex].value" >
-    <option value="<?php echo $_SERVER['REQUEST_URI']?>" <?php echo $en?> >English</option>
-    <option value="<?php echo $_SERVER['REQUEST_URI']?>" <?php echo $zh?> >中文</option>
+    <option value="<?php echo en_url?>" <?php echo $en?> >English</option>
+    <option value="<?php echo zh_url?>" <?php echo $zh?> >中文</option>
 </select>
 </form>
 <?php

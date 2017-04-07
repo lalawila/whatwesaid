@@ -3,7 +3,7 @@ global $splited_uri;
 switch ($splited_uri[0]) {
     case 'article':
     case 'login':
-    case 'people':
+    case 'user':
     case 'submit-article':
         require_once (ABSPATH . 'pages/' . $splited_uri[0] . '.php');
         break;

@@ -13,7 +13,7 @@ class WS_User {
     }
 
     public function __get ( $name ) {
-        return $user->$name;   
+        return $this->user->$name;   
     }
     
     public function change_password( $new_password ){
@@ -46,21 +46,29 @@ final class WS_UserManage {
      *$data['user_email']
      *$data['user_status']
     **/
-    private $_loged_user = null;
-    private $_page_user  = null;
+    protected $loged_user = null;
+    protected $page_user  = null;
     private $_db = null;
     private $has_logined = false;
-
+    private $_is_user_page = false;
     private static $_single = null;
 
     private function __construct($db = null ) {
+
+        global $splited_uri;
+
         if( isset($db) && $db instanceof WS_DB)
             $this->_db = $db;
         else
             $this->_db = $GLOBALS['wsdb']; 
-    
+        
+        if( count($splited_uri) == 2 && $splited_uri[0] == "user" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
+            $this->page_user = $this->get_user( [ "ID" => $splited_uri[1] ] );
+            if( $this->page_user )
+                $this->_is_user_page = true;
+        }
     }
-    public function __get( $nume ) {
+    public function __get( $name ) {
 
         return $this->$name;
     }
@@ -68,8 +76,11 @@ final class WS_UserManage {
         return isset(WS_UserManage::$_single) ? WS_UserManage::$_single : new WS_UserManage( $db );
     
     }
-
-    public function get_user($user = [ 'name' => '', 'email' => '', 'pwd' => '']) {
+    
+    public function is_user_page() {
+        return $this->_is_user_page;
+    }
+    public function get_user($user = [ 'name' => '', 'email' => '', 'ID' => '']) {
         $u_data = $this->get_user_data($user);
 
         if(!$u_data ){
@@ -77,26 +88,22 @@ final class WS_UserManage {
             return false;
         }
         
-        if(!password_verify($user['pwd'], $u_data['user_pass'])){
-            WS_Error::add_error( __('This password is error.'));
-            return false;
-        }
         return new WS_User($u_data);
     }
     public function get_user_data($user = [ 'name' => '', 'email' => '', 'ID' => '']) {
         $u_data = false;
         if (!empty($user['name'])){
-            $u_data = $this->_db->get_row( $wsdb->prepare(
+            $u_data = $this->_db->get_row( $this->_db->prepare(
 			"SELECT * FROM users WHERE user_login = %s", $user['name']
 		  ) );
         }
         elseif (!empty($user['email'])){
-            $u_data = $this->_db->get_row( $wsdb->prepare(
+            $u_data = $this->_db->get_row( $this->_db->prepare(
 			"SELECT * FROM users WHERE user_email = %s", $user['email']
 		  ) );
         }
         elseif (!empty($user['ID'])){
-            $u_data = $this->_db->get_row( $wsdb->prepare(
+            $u_data = $this->_db->get_row( $this->_db->prepare(
 			"SELECT * FROM users WHERE ID = %s", $user['ID']
 		  ) );
         }
@@ -105,18 +112,17 @@ final class WS_UserManage {
     public function check_login() {
 
         $this->has_logined = true;
-        if (isset($this->_loged_user))
+        if (isset($this->loged_user))
             return $this->loged_user;
-
         if (isset($_COOKIE["logined"])){
             $l_name = strstr($_COOKIE["logined"],'|',true);
             if ($this->validate_username($l_name)){
                 $user = $this->_db->get_row( $this->_db->prepare(
     			"SELECT * FROM users WHERE user_login = %s", $l_name
-                ), ARRAY_A );
+                ) );
 
-                if ($user && password_verify ($user ['user_pass'], substr(strstr($_COOKIE["logined"],'|',false), 1))){
-                    $this->_loged_user =  new WS_User($user);
+                if ($user && password_verify ( $user->user_pass, substr(strstr($_COOKIE["logined"],'|',false), 1))){
+                    $this->loged_user =  new WS_User($user);
                     return $user;
                 }
             }
