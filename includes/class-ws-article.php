@@ -13,10 +13,9 @@ class WS_Article {
     }
     public function __get( $name ) {
         if (in_array( $name, ['title', 'content']))
-            return $article[ $article['lang'] . '_' . $name ];
+            return $this->article[ $this->article['lang'] . '_' . $name ];
         else
-            return $article[$name];
-    
+            return $this->article[$name];
     }
 
 }
@@ -35,7 +34,7 @@ final class WS_ArticleManage {
 
         if( count($splited_uri) == 2 && $splited_uri[0] == "article" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
             $this->_is_article = true;
-            $this->_article = $this->get_article( $splited_uri[1] );
+            $this->_page_article = $this->get_article( $splited_uri[1] );
         }
         
     }
@@ -53,35 +52,34 @@ final class WS_ArticleManage {
     }
     
     public function __get( $name ) {
-            return $this->_page_article-> $name;
+            return $this->_page_article->$name;
     }
 
     public function get_article( $ID, $field = Null) {
         $field = isset($field) ? $field : '*';
         $article = $this->_db->get_row("
-    	SELECT $field
+    	SELECT $field 
     	FROM articles
         WHERE ID=$ID
     	", ARRAY_A);
-        $article[0]['author'] = $this->get_authors($ID);
-        return $article[0];
+        $article['authors'] = $this->get_authors($ID);
+        return new WS_Article( $article );
     }
     public function get_authors($ID) {
 
         $author_ID = $this->_db->get_results("
-    	SELECT author_ID
+    	SELECT ID_2
     	FROM term_rel
-        WHERE article_ID=$ID
+        WHERE ID_1=$ID AND rel='article_author' 
     	", ARRAY_A);
-
         $i = 0;
         foreach ($author_ID as $s_id) {
-            $t = $s_id['author_ID'];
-            $authors[$i] = $this->_db->get_results("
-    	   SELECT ID, name
+            $t = $s_id['ID_2'];
+            $authors[$i] = $this->_db->get_row("
+    	   SELECT *
     	   FROM author
            WHERE ID=$t
-    	   ", ARRAY_A)[0];
+    	   ");
             $i++;
         }
         return $authors;

@@ -182,3 +182,49 @@
 .bottom-line{
     border-bottom: 1px solid #d5d5d5;
 }
+
+/*
+ * 6.0 - user
+ */
+.user .data {
+    display: flex;
+    flex-direction:column;
+}
+.user .avatar {
+    width  : 200px;
+    height : 200px;
+    border-radius : 200px;
+    overflow : hidden;
+    background: black;
+    position: relative;
+}
+.user .avatar img{
+    width  : 200px;
+}
+.user .avatar p{
+    width: 100%;
+    line-height: 200px;
+    margin: 0;
+    text-align: center;
+    position: absolute;
+    color: white;
+    opacity: 0;
+}
+.user .avatar:hover p{
+    opacity:1;
+    z-index: 10;
+}
+.user .avatar:hover img{
+    opacity:0.5;
+}
+.user .nick-name {
+   font-size:1.5em; 
+}
+.user input {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    opacity: 0;
+    z-index: 50;
+    cursor : pointer;
+}

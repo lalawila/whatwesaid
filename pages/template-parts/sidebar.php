@@ -22,7 +22,7 @@ if($article->is_article()):
 ?>
 <label><?php echo _e('Author:'); ?></label>
 <?php
-echo $article->the_article()['author'][0]['name'];
+echo $article->authors[0]->name; 
 endif;
 ?>
 
