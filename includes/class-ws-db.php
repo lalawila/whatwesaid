@@ -36,8 +36,8 @@ class WS_DB {
     protected $reconnect_retries = 5;
     protected $col_meta = array();
 
-    public $charset = 'utf8mb4';
-    public $collate = 'utf8mb4_unicode_ci';
+    public $charset;
+    public $collate; 
     public function __construct($dbuser, $dbpassword, $dbname, $dbhost) {
         register_shutdown_function(array($this, '__destruct'));
 
@@ -97,6 +97,7 @@ class WS_DB {
 
         return false;
     }
+
     public function set_charset($dbh, $charset = null, $collate = null) {
         if (!isset($charset))
             $charset = $this->charset;
@@ -113,6 +114,7 @@ class WS_DB {
             }
         }
     }
+
    	public function prepare( $query, $args ) {
 		if ( is_null( $query ) )
 			return;
@@ -128,17 +130,21 @@ class WS_DB {
 		$query = preg_replace( '|(?<!%)%s|', "'%s'", $query ); // quote the strings, avoiding escaped strings like %%s
 		array_walk( $args, array( $this, 'escape_by_ref' ) );
 		return @vsprintf( $query, $args );
-	}
+    }
+
     public function escape_by_ref( &$string ) {
 		if ( ! is_float( $string ) )
 			$string = $this->_real_escape( $string );
-	}
+    }
+
     public function _real_escape( $string ) {
 		if ( $this->dbh ) {
 				return mysqli_real_escape_string( $this->dbh, $string );
 		}
 		return addslashes( $string );
-	}
+    
+    }
+
     public function select($db, $dbh = null) {
         if (is_null($dbh))
             $dbh = $this->dbh;
@@ -278,6 +284,7 @@ class WS_DB {
 
         return $return_val;
     }
+
 	public function check_connection( ) {
 		if ( ! empty( $this->dbh ) && mysqli_ping( $this->dbh ) ) {
 			return true;

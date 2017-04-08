@@ -17,6 +17,9 @@ else{
     <option value="<?php echo zh_url?>" <?php echo $zh?> >中文</option>
 </select>
 </form>
+
+<a class="button new-article" href="/submit-article" role="button" >new article</a>
+
 <?php
 if($article->is_article()):
 ?>

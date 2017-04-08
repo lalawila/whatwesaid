@@ -28,7 +28,7 @@
                             if($user->has_logined): 
                                 global $user;
                         ?>
-                            <li><a href="/people/<?php echo $user->loged_user->ID ?>"><?php echo __('Hi,' ). $user->loged_user->nick_name ?></a></li>
+                            <li><a href="/user/<?php echo $user->loged_user->ID ?>"><?php echo __('Hi,' ). $user->loged_user->nick_name ?></a></li>
                             <li><a href="/login?action=logout&redirect_to=<?php echo base64_encode($_SERVER['REQUEST_URI']) ?>"><?php echo __('logout');?></a></li>
                         <?php else:?>
                             <li><a href="/login?redirect_to=<?php echo base64_encode($_SERVER['REQUEST_URI']) ?>"><?php _e('Login');?></a></li>

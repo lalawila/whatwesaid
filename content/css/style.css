@@ -103,6 +103,19 @@
     font-size:1.5em;
 }
 
+/**/
+.siderbar .new-article {
+    width:200px;
+    height:30px;
+    margin-top:10px;
+    display:block;
+    text-align:center;
+    text-decoration:none;
+    font-size:1.5em;
+    background-color:#2bb86d;
+    border-radius:5px;
+    color:white;
+}
 
 
 /**

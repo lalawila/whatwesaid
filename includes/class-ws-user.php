@@ -69,7 +69,6 @@ final class WS_UserManage {
         }
     }
     public function __get( $name ) {
-
         return $this->$name;
     }
     public static function instance( $db = null ) {
@@ -141,7 +140,7 @@ final class WS_UserManage {
             $new_user = $this->instance(['name'=>$_POST['log'],'pwd' => $_POST['pwd']]);
             
         if($new_user){
-            setcookie('logined',$new_user->data['user_login'] . '|' . password_hash($new_user->data['user_pass'], PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', site_name );
+            setcookie('logined',$new_user->data['user_login'] . '|' . password_hash($new_user->data['user_pass'], PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', '.' . site_name );
             $user = $new_user;
         }
         return $user;
