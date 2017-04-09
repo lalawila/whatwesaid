@@ -13,9 +13,13 @@ class WS_User {
     }
 
     public function __get ( $name ) {
-        return $this->user->$name;   
+            return $this->user->$name;   
     }
     
+    public function pwd_verify( $pwd ) {
+        return password_verify ( $pwd, $this->user->user_pwd); 
+    
+    }
     public function change_password( $new_password ){
         
 
@@ -41,7 +45,7 @@ final class WS_UserManage {
     /**
      *$data['ID']
      *$data['user_login']
-     *$data['user_pass']
+     *$data['user_pwd']
      *$data['nick_name']
      *$data['user_email']
      *$data['user_status']
@@ -79,6 +83,7 @@ final class WS_UserManage {
     public function is_user_page() {
         return $this->_is_user_page;
     }
+
     public function get_user($user = [ 'name' => '', 'email' => '', 'ID' => '']) {
         $u_data = $this->get_user_data($user);
 
@@ -120,7 +125,7 @@ final class WS_UserManage {
     			"SELECT * FROM users WHERE user_login = %s", $l_name
                 ) );
 
-                if ($user && password_verify ( $user->user_pass, substr(strstr($_COOKIE["logined"],'|',false), 1))){
+                if ($user && password_verify ( $user->user_pwd, substr(strstr($_COOKIE["logined"],'|',false), 1))){
                     $this->loged_user =  new WS_User($user);
                     return $user;
                 }
@@ -130,18 +135,20 @@ final class WS_UserManage {
         return false;
     }
     public function login() {
-        
+        $user = false; 
         if (empty($_POST['log']) || empty($_POST['pwd']))
             return false;
             
         if ($this->is_email($_POST['log']))
-            $new_user = $this->instance(['email'=>$_POST['log'],'pwd' => $_POST['pwd']]);
+            $new_user = $this->get_user( ['email'=>$_POST['log']]);
         else
-            $new_user = $this->instance(['name'=>$_POST['log'],'pwd' => $_POST['pwd']]);
+            $new_user = $this->get_user( ['name'=>$_POST['log']] );
             
-        if($new_user){
-            setcookie('logined',$new_user->data['user_login'] . '|' . password_hash($new_user->data['user_pass'], PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', '.' . site_name );
+        if($new_user->pwd_verify( $_POST['pwd'] )){
+            setcookie('logined',$new_user->user_login . '|' . password_hash($new_user->user_pwd, PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', "." . site_name );
             $user = $new_user;
+            $this->loged_user = $new_user;
+            $this->has_logined = true;
         }
         return $user;
     }
@@ -149,11 +156,12 @@ final class WS_UserManage {
         global $user;
         if (isset($user)){
 
-            unset($GLOBALS['user']);
+            unset($this->loged_user);
 
             unset($_COOKIE['logined']);
             setcookie('logined', null, -1, '/', site_name);
-            
+            $this->has_logined = false;
+
             return true;
         }
         return false;   
@@ -221,9 +229,9 @@ final class WS_UserManage {
     public function create_user($username, $password, $email) {
         $user_login = addslashes($username);
         $user_email = addslashes($email);
-        $user_pass = $password;
+        $user_pwd = $password;
 
-        $userdata = compact('user_login', 'user_email', 'user_pass');
+        $userdata = compact('user_login', 'user_email', 'user_pwd');
         return $this->insert_user($userdata);
     }
 
@@ -253,12 +261,12 @@ final class WS_UserManage {
             }
 
             // hashed in wp_update_user(), plaintext if called directly
-            $user_pass = !empty($userdata['user_pass']) ? $userdata['user_pass'] : $old_user_data->
-                user_pass;
+            $user_pwd = !empty($userdata['user_pwd']) ? $userdata['user_pwd'] : $old_user_data->
+                user_pwd;
         } else {
             $update = false;
             // Hash the password
-            $user_pass = password_hash($userdata['user_pass'], PASSWORD_DEFAULT );
+            $user_pwd = password_hash($userdata['user_pwd'], PASSWORD_DEFAULT );
         }
 
         $sanitized_user_login = $this->sanitize_user($userdata['user_login'], true);
@@ -313,7 +321,7 @@ final class WS_UserManage {
 
         $meta['nickname'] = $nickname;
 
-        $compacted = compact('user_pass', 'user_email', 'nick_name');
+        $compacted = compact('user_pwd', 'user_email', 'nick_name');
 
         if ($update) {
             if ($user_email !== $old_user_data->user_email) {

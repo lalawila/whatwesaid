@@ -140,6 +140,7 @@
 }
 .submit-article input{
     line-height: 2em;
+    margin-bottom:10px;
 }
 .submit-article .language p{
     line-height: 2em;

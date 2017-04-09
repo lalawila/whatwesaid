@@ -10,7 +10,10 @@ header("Pragma: no-cache");
 load_style();
 //header('Content-Type: '.get_bloginfo('html_type').'; charset='.get_bloginfo('charset'));
 
-?><body class="login-body"><div class="login"><?php
+?><body class="login-body">
+<div class="login">    
+<p class="message"><?php echo base64_decode( $_REQUEST['msg'] ) ?></p>
+<?php
 switch ($action) {
     case 'login' :
         WS_Error::reset();
