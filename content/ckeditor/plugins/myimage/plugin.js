@@ -1,78 +1,40 @@
 ﻿CKEDITOR.plugins.add( 'myimage', {
-    icons: '',
+    icons: 'image',
     init: function( editor ) {
-        // Do not execute this paste listener if it will not be possible to upload file.
-        if ( !CKEDITOR.plugins.clipboard.isFileApiSupported ) {
-            return;
-        }
-
-        var fileTools = CKEDITOR.fileTools,
-            uploadUrl = fileTools.getUploadUrl( editor.config, 'image' );
-
-        if ( !uploadUrl ) {
-            CKEDITOR.error( 'uploadimage-config' );
-            return;
-        }       
-
-        // Handle images which are available in the dataTransfer.
-        fileTools.addUploadWidget( editor, 'uploadimage', {
-            supportedTypes: /image\/(jpeg|png|gif|bmp)/,
-
-            uploadUrl: uploadUrl,
-
-            fileToElement: function() {
-                var img = new CKEDITOR.dom.element( 'img' );
-                img.setAttribute( 'src', loadingImage );
-                return img;
-            },
-
-            parts: {
-                img: 'img'
-            },
-
-            onUploading: function( upload ) {
-                // Show the image during the upload.
-                this.parts.img.setAttribute( 'src', upload.data );
-            },
-
-            onUploaded: function( upload ) {
-                // Width and height could be returned by server (#13519).
-                var $img = this.parts.img.$,
-                    width = upload.responseData.width || $img.naturalWidth,
-                    height = upload.responseData.height || $img.naturalHeight;
-
-                // Set width and height to prevent blinking.
-                this.replaceWith( '<img src="' + upload.url + '" ' +
-                    'width="' + width + '" ' +
-                    'height="' + height + '">' );
-            }
-        } );
-
         editor.addCommand( 'upload', {
             exec: function( editor ) {
-                var now = new Date();
-                editor.insertHtml( 'The current date and time is: <em>' + now.toString() + '</em>' );
-                if( typeof(inputfile) == "undefined"){
+                if( typeof(inputfile) == "undefined" ){
                     abbs = CKEDITOR.document.getById("cke_article");
-                    var inputfile = new CKEDITOR.dom.element( 'input' );
-                    inputfile.setAttributes( {
-                        id:'inputfile',
-                        type:'file',
-                        accept:'image/jpg,image/jpeg,image/png',
-                        style:'display:none;'
-                    });
-                    inputfile.on('change', function(event){
-                        alert(inputfile.getValue());
-                        CKEDITOR.ajax.post( '/image.py','' , null, function( data ) {
-                        console.log( data );
-                        } );
-                    });
-                    abbs.append(inputfile);
+                    abbs.appendHtml('<form enctype="multipart/form-data" method="post" name="imagefile">'+
+                                    '<input id="inputfile" name="inputfile" type="file" multiple=""'+ 
+                                    'accept="image/jpg,image/jpeg,image/png" style="display: none;">'+
+                                    '</form>');
+                    inputfile = document.getElementById('inputfile');
+                    inputfile.onchange = function(event){
+                        var path = inputfile.value;
+                        if( path != '') {
+                            if ( window.FormData !== undefined){
+                                var image = new FormData(document.forms.namedItem("imagefile"));
+                                var xmlhttp = new XMLHttpRequest();
+                                xmlhttp.open("POST", "image.py", true);
+                                xmlhttp.onload = function( event ) {
+                                    if(this.status == 200) {
+                                        editor.insertHtml('<img style="max-width:100%;" src="' + xmlhttp.responseText + '">', 'unfiltered_html');
+                                    }
+                                    else
+                                        alert('fuck');
+                                
+                                }
+                                xmlhttp.send(image);
+                                
+                            }
+                        }
+                    };
                 }
-                document.getElementById('inputfile').click();
+                inputfile.click();
             }
         });
-        editor.ui.addButton( 'Timestamp', {
+        editor.ui.addButton( 'image', {
             label: 'Image',
             command: 'upload',
             toolbar: 'insert'
