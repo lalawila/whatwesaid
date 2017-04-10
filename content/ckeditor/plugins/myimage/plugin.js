@@ -11,18 +11,28 @@
                                     '</form>');
                     inputfile = document.getElementById('inputfile');
                     inputfile.onchange = function(event){
-                        var path = inputfile.value;
+                        var path = this.value;
                         if( path != '') {
+
+                            var files = this.files;
+                            for(var i in files){
+                                if( files[0].size/1024 > 200){
+                                    alert("max size 200Kb");
+                                    this.value = '';
+                                    return ;
+                                }
+                            }
+
                             if ( window.FormData !== undefined){
-                                var image = new FormData(document.forms.namedItem("imagefile"));
                                 var xmlhttp = new XMLHttpRequest();
                                 xmlhttp.open("POST", "image.py", true);
+                                var image = new FormData(document.forms.namedItem("imagefile"));
                                 xmlhttp.onload = function( event ) {
                                     if(this.status == 200) {
                                         editor.insertHtml('<img style="max-width:100%;" src="' + xmlhttp.responseText + '">', 'unfiltered_html');
                                     }
                                     else
-                                        alert('fuck');
+                                        alert('error');
                                 
                                 }
                                 xmlhttp.send(image);
