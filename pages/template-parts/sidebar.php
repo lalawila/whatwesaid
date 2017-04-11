@@ -25,6 +25,7 @@ if($article->is_article()):
 ?>
 <label><?php echo _e('Author:'); ?></label>
 <?php
+if(!$article->is_author):
 echo $article->authors[0]->name; 
 endif;
 ?>

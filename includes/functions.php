@@ -29,9 +29,7 @@ function page_404() {
     require_once (ABSPATH . 'pages/404.php');
 }
 
-function get_sidebar() {
-    include_once (ABSPATH . WWSTP . 'sidebar.php');
-}
+
 function get_footer() {
     include_once (ABSPATH . WWSTP . 'footer.php');
 }

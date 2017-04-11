@@ -38,6 +38,10 @@ class WS_DB {
 
     public $charset;
     public $collate; 
+
+    public $field_types;
+    protected $table_charset;
+
     public function __construct($dbuser, $dbpassword, $dbname, $dbhost) {
         register_shutdown_function(array($this, '__destruct'));
 
@@ -205,6 +209,7 @@ class WS_DB {
     public function query($query) {
         if (!$this->ready) {
             $this->check_current_query = true;
+            WS_Error::add_error('db not ready. ');
             return false;
         }
         $this->flush();
@@ -216,6 +221,7 @@ class WS_DB {
             $this->flush();
             if ($stripped_query !== $query) {
                 $this->insert_id = 0;
+                WS_Error::add_error('query is not safe. ');
                 return false;
             }
         }
@@ -257,7 +263,6 @@ class WS_DB {
 
             return false;
         }
-
         if (preg_match('/^\s*(create|alter|truncate|drop)\s/i', $query)) {
             $return_val = $this->result;
         } elseif (preg_match('/^\s*(insert|delete|update|replace)\s/i', $query)) {
@@ -281,7 +286,6 @@ class WS_DB {
             $this->num_rows = $num_rows;
             $return_val = $num_rows;
         }
-
         return $return_val;
     }
 
@@ -600,7 +604,7 @@ class WS_DB {
 		}
 	}
     
-    	public function insert( $table, $data, $format = null ) {
+    public function insert( $table, $data, $format = null ) {
 		return $this->_insert_replace_helper( $table, $data, $format, 'INSERT' );
 	}
     	/** 
@@ -620,11 +624,13 @@ class WS_DB {
 		$this->insert_id = 0;
 
 		if ( ! in_array( strtoupper( $type ), array( 'REPLACE', 'INSERT' ) ) ) {
+            WS_Error::add_error(__('Only for replace and insert.'));
 			return false;
 		}
 
 		$data = $this->process_fields( $table, $data, $format );
 		if ( false === $data ) {
+            WS_Error::add_error(__('Process fields fail.'));
 			return false;
 		}
 
@@ -647,29 +653,29 @@ class WS_DB {
 		$this->check_current_query = false;
 		return $this->query( $this->prepare( $sql, $values ) );
 	}
-    	protected function process_fields( $table, $data, $format ) {
+    protected function process_fields( $table, $data, $format ) {
 		$data = $this->process_field_formats( $data, $format );
 		if ( false === $data ) {
-		    WS_Error::add_error('process field formats error');
+		    WS_Error::add_error('process field formats error.');
 			return false;
 		}
 
 		$data = $this->process_field_charsets( $data, $table );
 		if ( false === $data ) {
-		    WS_Error::add_error('process field charsets error');
+		    WS_Error::add_error('process field charsets error.');
 			return false;
 		}
 
 		$data = $this->process_field_lengths( $data, $table );
 		if ( false === $data ) {
-		    WS_Error::add_error('process field lengths error');
+		    WS_Error::add_error('process field lengths error.');
 			return false;
 		}
 
 		$converted_data = $this->strip_invalid_text( $data );
 
 		if ( $data !== $converted_data ) {
-		    WS_Error::add_error('strip invalid textprocess error');
+		    WS_Error::add_error('strip invalid textprocess error.');
 			return false;
 		}
 
@@ -709,7 +715,6 @@ class WS_DB {
 			} else {
 				$value['charset'] = $this->get_col_charset( $table, $field );
 				if ( !$value['charset']  ) {
-				    WS_Error::add_error('get col charset error');
 					return false;
 				}
 			}
@@ -730,6 +735,7 @@ class WS_DB {
 			} else {
 				$value['length'] = $this->get_col_length( $table, $field );
 				if (!$value['length'] ) {
+                    WS_Error::add_error('get ' . $field . ' length error.');
 					return false;
 				}
 			}
@@ -891,7 +897,6 @@ class WS_DB {
 		$tablekey = strtolower( $table );
 		$columnkey = strtolower( $column );
 
-
 		if ( empty( $this->table_charset[ $tablekey ] ) ) {
 			// This primes column information for us.
 			$table_charset = $this->get_table_charset( $table );
@@ -899,22 +904,19 @@ class WS_DB {
 				return false;
 			}
 		}
-
 		// If still no column information, return the table charset.
 		if ( empty( $this->col_meta[ $tablekey ] ) ) {
 			return $this->table_charset[ $tablekey ];
 		}
-
+        
 		// If this column doesn't exist, return the table charset.
 		if ( empty( $this->col_meta[ $tablekey ][ $columnkey ] ) ) {
 			return $this->table_charset[ $tablekey ];
 		}
-
 		// Return false when it's not a string column.
 		if ( empty( $this->col_meta[ $tablekey ][ $columnkey ]->Collation ) ) {
 			return false;
 		}
-
 		list( $charset ) = explode( '_', $this->col_meta[ $tablekey ][ $columnkey ]->Collation );
 		return $charset;
 	}
@@ -1022,7 +1024,6 @@ class WS_DB {
 		} else {
 			$length = false;
 		}
-
 		switch( $type ) {
 			case 'char':
 			case 'varchar':

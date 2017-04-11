@@ -7,7 +7,7 @@
                     abbs = CKEDITOR.document.getById("cke_article");
                     abbs.appendHtml('<form enctype="multipart/form-data" method="post" name="imagefile">'+
                                     '<input id="inputfile" name="inputfile" type="file" multiple=""'+ 
-                                    'accept="image/jpg,image/jpeg,image/png" style="display: none;">'+
+                                    'accept="image/jpg,image/jpeg,image/png,image/gif" style="display: none;">'+
                                     '</form>');
                     inputfile = document.getElementById('inputfile');
                     inputfile.onchange = function(event){
@@ -16,8 +16,8 @@
 
                             var files = this.files;
                             for(var i in files){
-                                if( files[0].size/1024 > 200){
-                                    alert("max size 200Kb");
+                                if( files[0].size/1024 > 5*1024){
+                                    alert("max size 5Mb");
                                     this.value = '';
                                     return ;
                                 }
@@ -29,7 +29,8 @@
                                 var image = new FormData(document.forms.namedItem("imagefile"));
                                 xmlhttp.onload = function( event ) {
                                     if(this.status == 200) {
-                                        editor.insertHtml('<img style="max-width:100%;" src="' + xmlhttp.responseText + '">', 'unfiltered_html');
+                                        editor.insertHtml('<img style="max-width:100%;margin:0 auto;display:block;" '+
+                                            'src="' + xmlhttp.responseText + '">', 'unfiltered_html');
                                     }
                                     else
                                         alert('error');

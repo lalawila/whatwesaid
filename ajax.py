@@ -31,7 +31,7 @@ class CommentHandler(tornado.web.RequestHandler):
 
 class ImageSave(tornado.web.RequestHandler):
     def post(self):
-        upload_path=os.path.join('content', 'image')
+        upload_path = os.path.join('content', 'image')
         file_metas=self.request.files['inputfile']
         for meta in file_metas:
             name = str(base64.urlsafe_b64encode(str(time.time()).encode()))
@@ -40,7 +40,8 @@ class ImageSave(tornado.web.RequestHandler):
             filepath = os.path.join(upload_path, name)
             with open(filepath,'wb') as file:
                 file.write(meta['body'])
-            self.write(filepath)
+            self.write('\\' + filepath)
+            print(meta['content_type'])
             print(filepath)
 
 if __name__ == '__main__':

@@ -135,32 +135,43 @@
  *  4.0 - submit article
  */
 .submit-article-form {
+    display: flex;
+    width:100%;
+}
+.submit-article-left{
    display: flex;
    flex-direction: column; 
 }
-.submit-article input{
+.submit-article-form input{
     line-height: 2em;
     margin-bottom:10px;
 }
-.submit-article .language p{
+.submit-article-left .language p{
     line-height: 2em;
     margin: 0;
 }
-.submit-article .language {
+.submit-article-left .language {
     display: flex;
 }
-.submit-article .language-submit{
+.submit-article-left .language-submit{
     display: flex;
     justify-content: space-between;
     width:100%;
 }
-.submit-article select {
+.submit-article-left select {
     -moz-appearance: none;
     -webkit-appearance:none;
     appearance:none;  
     margin-left:1em;
 }
 
+.submit-article-right {
+   display: flex;
+   flex-direction: column; 
+}
+.submit-article-right .is-original {
+    display: flex;
+}
 
 /**
  * 5.0 - login

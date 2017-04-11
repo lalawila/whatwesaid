@@ -7,13 +7,15 @@
                 foreach ( $posts as $post ) 	
                 {
                     ?>
-                    <a class="loop-title" href="article/<?php echo $post['ID']; ?>"><?php echo $post['title']; ?></a>
-                    <div class="loop-content"><?php echo $post['content']; ?></div>
+                    <a class="loop-title" href="article/<?php echo $post->ID; ?>"><?php echo $post->title; ?></a>
+                    <div class="loop-content"><?php echo $post->excerpt; ?></div>
                     <?php
                 }
            ?>
         </div>
-        <?php get_sidebar(); ?>
+        <div id="secondary" class="siderbar" role="complementary">
+            <a class="button new-article" href="/submit-article" role="button" >new article</a>
+        </div>
     </main><!-- .site-main -->
 
 <?php get_footer(); ?>

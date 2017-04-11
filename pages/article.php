@@ -9,7 +9,14 @@
                         <input type="submit" name="submit" id="submit" class="button button-comment" value="submit">
                 </div>
         </div>
-        <?php get_sidebar(); ?>
+        <div id="secondary" class="siderbar" role="complementary">
+            <?php
+            global $article;
+            if($article->is_author == false):
+                ?><label><?php echo __('Author:'); ?></label><?php
+                //echo $article->authors[0]->name;
+            endif;
+            ?>
+        </div>
     </main><!-- .site-main -->
-
-<?php get_footer(); ?>
+<?php get_footer();

@@ -12,7 +12,7 @@ class WS_Article {
             $this->_db = $GLOBALS['wsdb'];
     }
     public function __get( $name ) {
-        if (in_array( $name, ['title', 'content']))
+        if (in_array( $name, ['title', 'content', 'excerpt']))
             return $this->article[ $this->article['lang'] . '_' . $name ];
         else
             return $this->article[$name];
@@ -66,7 +66,7 @@ final class WS_ArticleManage {
         return new WS_Article( $article );
     }
     public function get_authors($ID) {
-
+        $authors = array();
         $author_ID = $this->_db->get_results("
     	SELECT ID_2
     	FROM term_rel
@@ -76,48 +76,40 @@ final class WS_ArticleManage {
         foreach ($author_ID as $s_id) {
             $t = $s_id['ID_2'];
             $authors[$i] = $this->_db->get_row("
-    	   SELECT *
-    	   FROM author
-           WHERE ID=$t
-    	   ");
+    	    SELECT *
+    	    FROM author
+            WHERE ID=$t
+    	    ");
             $i++;
         }
         return $authors;
     }
 
     public function get_article_from_newest( $num = 5, $lang = "ori" ) {
-	$title   = $lang . '_title';
-	$content = $lang . '_content';
-	if( $lang == "ori" ):	
-        	$ats_temp = $this->_db->get_results("
-    		SELECT ID, lang, date, en_title, en_content, zh_title, zh_content
-    		FROM articles
-		order by ID desc limit $num
-		", ARRAY_A);
-		foreach( $ats_temp as $at) {
-			$at['title']   = $at[$at['lang'] . '_title'];
-			$at['content'] = $at[$at['lang'] . '_content'];
-			unset($at['en_title']);
-			unset($at['zh_title']);
-			unset($at['en_content']);
-			unset($at['zh_content']);
-			$articles[] = $at;
-		} 
-	else:
-        	$articles = $this->_db->get_results("
-    		SELECT ID, lang, date, $ltitle,$content 
-    		FROM articles
-		WHERE lang=$lang
-		order by ID desc limit $num
-		", ARRAY_A);
-	endif;
+        if( $lang == "ori" ):	
+            $temps = $this->_db->get_results("
+            SELECT *
+            FROM articles
+            order by ID desc limit $num
+            ", ARRAY_A);
+        else:
+            $temps = $this->_db->get_results("
+            SELECT * 
+            FROM articles
+            WHERE lang=$lang
+            order by ID desc limit $num
+            ", ARRAY_A);
+        endif;
+        foreach( $temps as $at) {
+            $articles[] = new WS_Article($at);
+        } 
         return $articles;
     }
 
     public function get_post($lang, $ID) {
         $tablename = $lang . '_posts';
         $en_post = $this->_db->get_results("
-    	SELECT ID, article_ID, post_title, post_content
+        SELECT ID, article_ID, post_title, post_content
     	FROM $tablename
         WHERE ID=$ID
     	", ARRAY_A);
