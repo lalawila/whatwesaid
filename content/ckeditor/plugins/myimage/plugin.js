@@ -33,7 +33,7 @@
                                             'src="' + xmlhttp.responseText + '">', 'unfiltered_html');
                                     }
                                     else
-                                        alert('error');
+                                        alert('error:' + xmlhttp.responseText);
                                 
                                 }
                                 xmlhttp.send(image);

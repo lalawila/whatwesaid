@@ -1,7 +1,5 @@
 <?php
-
-function get_header( ) {
-
+function get_header( $func = null ) {
     require_once (ABSPATH . WWSTP . 'header.php');
 }
 function get_site_url() {
@@ -27,6 +25,7 @@ function load_ckeditor() {
 }
 function page_404() {
     require_once (ABSPATH . 'pages/404.php');
+    exit();
 }
 
 
@@ -35,16 +34,9 @@ function get_footer() {
 }
 function split_uri() {
 
-	//if ($_SERVER['REQUEST_URI'] == '/')
-	//	return 'home';
-	//$page = null;
-	//if (preg_match ('@.*\/(.*?)(?:\?|$)@' ,$_SERVER['REQUEST_URI'],$page))
-       	//	return $page[1];
-        //return '404';
-
-        $uri = null;
-        preg_match_all( '@\/([^\/\?]+)@', $_SERVER['REQUEST_URI'], $uri );
-        return empty($uri[1]) ? ['home']: $uri[1];
+    $uri = null;
+    preg_match_all( '@\/([^\/\?]+)@', $_SERVER['REQUEST_URI'], $uri );
+    return empty($uri[1]) ? ['home']: $uri[1];
 }
 function get_locale() {
     //不精确，得修改

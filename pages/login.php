@@ -3,6 +3,7 @@ global $user;
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : 'login';
 $redirect_to = isset($_REQUEST['redirect_to']) ? base64_decode($_REQUEST['redirect_to']) : '/';
+$msg = isset($_REQUEST['msg']) ? $_REQUEST['msg'] : '';
 
 @header_remove( 'Last-Modified' );
 header("Cache-Control: no-cache");
@@ -12,7 +13,7 @@ load_style();
 
 ?><body class="login-body">
 <div class="login">    
-<p class="message"><?php echo base64_decode( $_REQUEST['msg'] ) ?></p>
+<p class="message"><?php echo base64_decode( $msg ) ?></p>
 <?php
 switch ($action) {
     case 'login' :

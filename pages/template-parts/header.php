@@ -9,11 +9,9 @@
     <!--<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>-->
 	<?php 
 	load_style('style.css');
-
-        if($GLOBALS['splited_uri'][0] === 'submit-article'):
-		load_ckeditor(); 
-		load_script('detect-lang-ajax.js');
-	endif;
+    load_script('script.js');
+    if( $func != null )
+        $func();
     ?>
 </head>
 

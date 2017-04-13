@@ -16,7 +16,7 @@ get_header();?>
         <div  class="user">
             <div class="data">
                 <div class="avatar">
-                    <form action="/user/5" method="post" enctype="multipart/form-data" onchange="this.submit()">
+                    <form action="" method="post" enctype="multipart/form-data" onchange="this.submit()">
                         <input type="file" name="avatar"  accept="image/png, image/jpeg" /> 
                     </form>
                     <p>Upload avatar</p>
@@ -25,6 +25,17 @@ get_header();?>
                 <div class="nick-name">
                 <?php echo $user->page_user->nick_name;?>
                 </div>
+            </div>
+            <div class="record-list">
+                <?php 
+                $posteds = $article->get_articles_by_user($user->page_user->ID);
+                foreach( $posteds as $post ){
+                    echo '<div class="record"> <a class="title-link" href="/article/' . $post->ID . '">' . $post->title . '</a>';
+                    if($user->has_logined && $user->loged_user->ID == $user->page_user->ID)
+                        echo '<a class="title-edit" href="/submit-article/' . $post->ID . '">[edit]</a>';
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
 </main><!-- .site-main -->

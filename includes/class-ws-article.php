@@ -35,6 +35,8 @@ final class WS_ArticleManage {
         if( count($splited_uri) == 2 && $splited_uri[0] == "article" && is_numeric($splited_uri[1]) && $splited_uri[1] > 0 ) {
             $this->_is_article = true;
             $this->_page_article = $this->get_article( $splited_uri[1] );
+            if($this->_page_article == false)
+                $this->_is_article = false;
         }
         
     }
@@ -62,6 +64,10 @@ final class WS_ArticleManage {
     	FROM articles
         WHERE ID=$ID
     	", ARRAY_A);
+        
+        if( $article == null )
+            return false;
+
         $article['authors'] = $this->get_authors($ID);
         return new WS_Article( $article );
     }
@@ -85,6 +91,25 @@ final class WS_ArticleManage {
         return $authors;
     }
 
+    public function get_articles_by_user( $ID ){
+        $temps = $this->_db->get_results("
+        SELECT *
+        FROM articles
+        WHERE user_id=$ID
+        order by ID desc
+        ", ARRAY_A);
+        if($temps == null)
+            return false;
+        return $this->_init_articles($temps); 
+    }
+    private function _init_articles( $arr ) {
+        if( $arr == null)
+            return false;
+        foreach( $arr as $at) {
+            $articles[] = new WS_Article($at);
+        }
+        return $articles;
+    }
     public function get_article_from_newest( $num = 5, $lang = "ori" ) {
         if( $lang == "ori" ):	
             $temps = $this->_db->get_results("
@@ -100,10 +125,7 @@ final class WS_ArticleManage {
             order by ID desc limit $num
             ", ARRAY_A);
         endif;
-        foreach( $temps as $at) {
-            $articles[] = new WS_Article($at);
-        } 
-        return $articles;
+        return $this->_init_articles($temps); 
     }
 
     public function get_post($lang, $ID) {
