@@ -11,7 +11,7 @@ else:
 endif;
 
 function translate() {
-    echo '<div class="submit-translate"><p>no translate</p><a href="/translate/' . $article->ID .'">translate</a></div>';
+    echo '<div class="submit-translate"><p>no translate</p><a href="/translate/' . $GLOBALS['article']->ID .'">translate</a></div>';
 }
 
 get_header(); ?>

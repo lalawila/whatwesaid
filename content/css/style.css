@@ -160,12 +160,16 @@
 /**/
 .translate {
     display:flex;
+    width:100%;
+    justify-content: space-between;
 }
 .translate-right, .translate-left{
-    width:40%;
+    width:48%;
 }
-.translate .title{
+.translate input{
     width:100%;
+    margin: 20px 0;
+    line-height: 2em;
 }
 /**/
 .siderbar .new-article {
