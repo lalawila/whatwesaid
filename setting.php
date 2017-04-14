@@ -30,6 +30,7 @@
     require_once ( ABSPATH . WWSINC . 'class-smtp.php' );
     require_once ( ABSPATH . WWSINC . 'class-phpmailer.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-pluggable.php' );
+    require_once ( ABSPATH . WWSINC . 'class-ws-translation.php' );
     
     init_lang();
     ws_cache_init();
@@ -40,6 +41,7 @@
     $GLOBALS['wsdb']->field_types = ['is_author' => '%d', 'user_id' => '%d'];
     $GLOBALS['article'] = WS_ArticleManage::instance();
     $GLOBALS['user'] = WS_UserManage::instance();
+    $GLOBALS['translation_m'] = WS_TranslationManage::instance();
 
     date_default_timezone_set('UTC'); 
     $GLOBALS['user']->check_login();

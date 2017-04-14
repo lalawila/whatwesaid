@@ -24,7 +24,7 @@ final class WS_ArticleManage {
     private $_is_article = false;
     private $_db = null;
     private static $_single = null;
-    public function __construct( $db = Null ) {
+    private function __construct( $db = Null ) {
         global $splited_uri;
 
         if (isset($db) && $db instanceof WS_DB)

@@ -39,6 +39,7 @@ function get( $post, $name ){
 
 
 function load_file() {
+    load_script('verify.js');
     load_script('detect-lang-ajax.js');
     load_ckeditor();
 
@@ -52,7 +53,7 @@ if( empty($_POST['title']) || empty($_POST['content'])|| empty($_POST['lang'] ||
 <div class="posts">
 <div class="submit-article-left">
 <input type="text" name="title" id="article-title"  placeholder="title" value="<?php echo get($post, 'title') ?>" ></input>
-<input type="text" name="author" id="article-author"  placeholder="author" value="<?php echo get($post, 'authors') ?>"></input>
+<input type="text" name="author" id="article-author"  placeholder="authors' name splited with ;" value="<?php echo get($post, 'authors') ?>"></input>
 <textarea id = "content" name = "content"  placeholder="content" ><?php echo get( $post, 'content') ?></textarea>
     <div class = "language-submit">
     <div class="language">
@@ -62,7 +63,7 @@ if( empty($_POST['title']) || empty($_POST['content'])|| empty($_POST['lang'] ||
 	        <option value = "zh" <?php echo get($post,'lang') == 'zh' ? 'selected':'' ?> >chinese</option>
 	    </select>
     </div>
-	    <button name = "submit">submit</button>
+	    <button id="submit-article" name = "submit-ariticle">submit</button>
     </div>
 	<script>
 		CKEDITOR.replace( 'content');

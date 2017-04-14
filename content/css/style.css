@@ -117,9 +117,19 @@
 .title-edit {
     margin-left: 2em;
     visibility:hidden;
+
+}
+.list {
+    display:flex;
+    flex-direction: column;
+}
+
+.record-list , .translation-list {
+    border: 1px solid #777777;
+    
 }
 .record {
-    margin:3em 1em;
+    margin:1em 1em;
 }
 .record:hover > .title-edit {
     visibility:visible

@@ -1,5 +1,6 @@
 <?php
 global $user;
+global $translation_m;
 if( !$user->is_user_page() ) {
     page_404();
     exit();
@@ -26,16 +27,29 @@ get_header();?>
                 <?php echo $user->page_user->nick_name;?>
                 </div>
             </div>
+            <div class="list">
             <div class="record-list">
+            <p> article </p>
                 <?php 
                 $posteds = $article->get_articles_by_user($user->page_user->ID);
                 foreach( $posteds as $post ){
                     echo '<div class="record"> <a class="title-link" href="/article/' . $post->ID . '">' . $post->title . '</a>';
-                    if($user->has_logined && $user->loged_user->ID == $user->page_user->ID)
+                    if($user->has_logined && $user->loged_user == $user->page_user)
                         echo '<a class="title-edit" href="/submit-article/' . $post->ID . '">[edit]</a>';
                     echo '</div>';
                 }
                 ?>
+            </div>
+            <div class="translation-list">
+            <p> translation </p>
+                <?php
+                $translations = $translation_m->get_translations_by_user($user->page_user->ID);
+                foreach( $translations as $translation ){
+                    echo '<div class="record"> <a class="title-link" href="/article/' . $translation->ID . '">' . $translation->title . '</a>';
+                    echo '[' . $translation->status . ']';
+                }
+                ?>
+            </div>
             </div>
         </div>
 </main><!-- .site-main -->
