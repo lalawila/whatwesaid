@@ -20,6 +20,7 @@ define("port", default=8000, help="run on the given port", type=int)
 class Detect_lang(tornado.web.RequestHandler):
     def post(self):
         text = self.request.body
+        print(text);
         self.write(detect(text.decode('UTF-8'))[:2])
 
 class StatusHandler(tornado.websocket.WebSocketHandler):

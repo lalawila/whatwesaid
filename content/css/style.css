@@ -141,6 +141,10 @@
 .site-main li{
     margin:1em 0 1em 0;
 }
+.language-submit {
+    margin-top:15px;
+
+}
 /**/
 .language {
     width: 200px;
@@ -270,11 +274,15 @@
     -webkit-box-shadow: 0 0 0 30px #fff inset;
     -webkit-text-fill-color: #555;
 }
+.login .loginform .button{
+    border: 1px solid #d5d5d5;
+    border-radius: 5px;
+}
 
 .group-inputs {
     border: 1px solid #d5d5d5;
 }
-.bottom-line{
+.login .loginform .bottom-line{
     border-bottom: 1px solid #d5d5d5;
 }
 

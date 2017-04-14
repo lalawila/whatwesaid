@@ -6,7 +6,7 @@ switch ($splited_uri[0]) {
     case 'user':
     case 'submit-article':
     case 'translate':
-    case 'test':
+    case 'admin':
         require_once (ABSPATH . 'pages/' . $splited_uri[0] . '.php');
         break;
     case 'home':

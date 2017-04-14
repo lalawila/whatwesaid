@@ -1,0 +1,116 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: wws\n"
+"POT-Creation-Date: 2017-04-14 07:46+0800\n"
+"PO-Revision-Date: 2017-04-14 07:47+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.12\n"
+"X-Poedit-Basepath: D:/linzao3d/git\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: content\n"
+
+#: includes/class-ws-comment.php:27
+msgid "comment over 140"
+msgstr ""
+
+#: includes/class-ws-db.php:716
+msgid "Only for replace and insert."
+msgstr ""
+
+#: includes/class-ws-db.php:722
+msgid "Process fields fail."
+msgstr ""
+
+#: includes/class-ws-user.php:91
+msgid "This username is invalid."
+msgstr ""
+
+#: includes/class-ws-user.php:157
+msgid "Password error."
+msgstr ""
+
+#: includes/class-ws-user.php:202
+msgid "Please enter a username."
+msgstr ""
+
+#: includes/class-ws-user.php:204
+msgid ""
+"This username is invalid because it uses illegal characters. Please enter a "
+"valid username."
+msgstr ""
+
+#: includes/class-ws-user.php:207
+msgid "This username is already registered. Please choose another one."
+msgstr ""
+
+#: includes/class-ws-user.php:215
+msgid "Please type your email address."
+msgstr ""
+
+#: includes/class-ws-user.php:217
+msgid "The email address isn&#8217;t correct."
+msgstr ""
+
+#: includes/class-ws-user.php:220
+msgid "This email is already registered, please choose another one."
+msgstr ""
+
+#: includes/class-ws-user.php:267
+msgid "Invalid user ID."
+msgstr ""
+
+#: includes/class-ws-user.php:285
+msgid "Cannot create a user with an empty login name."
+msgstr ""
+
+#: includes/class-ws-user.php:288
+msgid "Username may not be longer than 60 characters."
+msgstr ""
+
+#: includes/class-ws-user.php:293
+msgid "Sorry, that username already exists!"
+msgstr ""
+
+#: includes/class-ws-user.php:304
+msgid "Nicename may not be longer than 50 characters."
+msgstr ""
+
+#: index.php:16
+msgid "test"
+msgstr "测试"
+
+#: pages/article.php:23 pages/article.php:31
+msgid "English"
+msgstr ""
+
+#: pages/article.php:24 pages/article.php:32
+msgid "Chinese"
+msgstr ""
+
+#: pages/article.php:45
+msgid "Author:"
+msgstr ""
+
+#: pages/submit-article.php:6 pages/translate.php:6
+msgid "please login first"
+msgstr ""
+
+#: pages/template-parts/header.php:31
+msgid "Hi,"
+msgstr ""
+
+#: pages/template-parts/header.php:32
+msgid "logout"
+msgstr ""
+
+#: pages/template-parts/header.php:34
+msgid "Login"
+msgstr ""

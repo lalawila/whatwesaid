@@ -10,8 +10,8 @@ else:
     $en_css = 'display:block';
 endif;
 
-function translate() {
-    echo '<div class="submit-translate"><p>no translate</p><a href="/translate/' . $GLOBALS['article']->ID .'">translate</a></div>';
+function translate($lang) {
+    echo '<div class="submit-translate"><p>no traslation</p><a href="/translate/' . $GLOBALS['article']->ID . '?lang=' . $lang .'">translate</a></div>';
 }
 
 get_header(); ?>
@@ -23,7 +23,7 @@ get_header(); ?>
                 <label name="select-en" class="selected" onclick="select_en()"><?php echo __('English') ?></label>
                 <label name="select-zh" class="unselect" onclick="select_zh()"><?php echo __('Chinese') ?></label>
                 </div>
-                <div id="content-en" class="content"><?php echo is_null($article->en_content)?tranlate():$article->en_content; ?></div>
+                <div id="content-en" class="content"><?php echo is_null($article->en_content)?tranlate('en'):$article->en_content; ?></div>
         </div>
         <div id="post-zh" style="<?php echo $zh_css ?>">
                 <h1 id="title-zh" class="title"><?php echo is_null($article->zh_title)?$article->title:$article->zh_title; ?></h1>
@@ -31,19 +31,22 @@ get_header(); ?>
                 <label name="select-en" class="unselect" onclick="select_en()"><?php echo __('English') ?></label>
                 <label name="select-zh" class="selected" onclick="select_zh()"><?php echo __('Chinese') ?></label>
                 </div>
-                <div id="content-zh" class="content"><?php echo is_null($article->zh_content)?translate():$article->zh_content; ?></div>
+                <div id="content-zh" class="content"><?php echo is_null($article->zh_content)?translate('zh'):$article->zh_content; ?></div>
         </div>
-                <div class="comment-area">
+                <!--<div class="comment-area">
                         <textarea class="comment" name="comment-1" id="comment-1" maxlength="140" placeholder="What do you thing?"></textarea>
                         <input type="submit" name="submit" id="submit" class="button button-comment" value="submit">
-                </div>
+                </div>-->
         </div>
         <div id="secondary" class="siderbar" role="complementary">
             <?php
             global $article;
+            echo '<a href="' . $article->original . '">Original</a></br>';
             if($article->is_author == false):
                 ?><label><?php echo __('Author:'); ?></label><?php
-                //echo $article->authors[0]->name;
+                    foreach( $article->authors as $author)
+                        echo $author->name;
+
             endif;
             ?>
         </div>

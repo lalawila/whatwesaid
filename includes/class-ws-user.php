@@ -144,12 +144,20 @@ final class WS_UserManage {
         else
             $new_user = $this->get_user( ['name'=>$_POST['log']] );
             
+        if($new_user == false){
+            return false;
+        }
         if($new_user->pwd_verify( $_POST['pwd'] )){
             setcookie('logined',$new_user->user_login . '|' . password_hash($new_user->user_pwd, PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', "." . site_name );
             $user = $new_user;
             $this->loged_user = $new_user;
             $this->has_logined = true;
         }
+        else {
+            WS_Error::add_error(__('Password error.'));
+            return false;
+        }
+
         return $user;
     }
     public function logout() {

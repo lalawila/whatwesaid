@@ -1,7 +1,7 @@
 <?php 
 global $user;
 global $splited_uri;
-
+global $article;
 if( !$user->has_logined ){
     header("Location: /login?msg=" . base64_encode(__('please login first')), true, '303');
     exit();
@@ -27,9 +27,10 @@ function get( $post, $name ){
     if( $post != false ):
         if($name == 'authors'){
             $authors_str = "";
-            foreach( $post->authors as $author)
-                $authors_str += $author . '; ';
-            return $authors_str;
+            foreach( $post->authors as $author ) {
+                $authors_str .= ';  ' . $author->name;
+            }
+            return substr($authors_str,3);
         }
         return $post->$name;
     endif;
@@ -38,11 +39,12 @@ function get( $post, $name ){
 
 
 function load_file() {
+    load_script('detect-lang-ajax.js');
     load_ckeditor();
 
 }
 get_header('load_file'); 
-if( empty($_POST['title']) || empty($_POST['article'])|| empty($_POST['lang']) 
+if( empty($_POST['title']) || empty($_POST['content'])|| empty($_POST['lang'] || empty($_POST['author'])) 
     || ( empty($_POST['is_author']) && empty($_POST['original'] ))):
 ?>
 <main id="main" class="site-main" role="main">
@@ -50,29 +52,29 @@ if( empty($_POST['title']) || empty($_POST['article'])|| empty($_POST['lang'])
 <div class="posts">
 <div class="submit-article-left">
 <input type="text" name="title" id="article-title"  placeholder="title" value="<?php echo get($post, 'title') ?>" ></input>
-<input type="text" name="author" id="article-author"  placeholder="author"><?php echo get($post, 'authors') ?></input>
-<textarea id = "article" name = "article"  placeholder="article" ><?php echo get( $post, 'content') ?></textarea>
+<input type="text" name="author" id="article-author"  placeholder="author" value="<?php echo get($post, 'authors') ?>"></input>
+<textarea id = "content" name = "content"  placeholder="content" ><?php echo get( $post, 'content') ?></textarea>
     <div class = "language-submit">
     <div class="language">
         <p>the language is </p>
 	    <select id="lang" name = "lang"> 
-	        <option value = "en">english</option>
-	        <option value = "zh">chinese</option>
+	        <option value = "en" <?php echo get($post,'lang') == 'en' ? 'selected':'' ?> >english</option>
+	        <option value = "zh" <?php echo get($post,'lang') == 'zh' ? 'selected':'' ?> >chinese</option>
 	    </select>
     </div>
 	    <button name = "submit">submit</button>
     </div>
 	<script>
-		CKEDITOR.replace( 'article');
+		CKEDITOR.replace( 'content');
 	</script>
 </div>
 </div>
 <div class = "siderbar submit-article-right">
     <div class = "original">
-        <input type="text" id="original" name="original" placeholder="The link to original"></input>
+        <input type="text" id="original" name="original" placeholder="The link to original" value="<?php echo get($post, 'original') ?>" ></input>
         <div class="is-original" >
-            <input type="checkbox" name="is_author" onchange="document.getElementById('original').disabled=this.checked" ></input>
-            <p>I am the author of this article.</p>
+        <input type="checkbox" id="is_author" name="is_author" <?php echo get($post,'is_author')?'checked':'' ?> onchange="document.getElementById('original').disabled=this.checked" ></input>
+            <label for="is_author">I am the author.</label>
         </div>
     </div>
 </div>
@@ -84,29 +86,33 @@ else:
 	$title    = $_POST['title'];
 	$author   = $_POST['author'];
 	$lang     = $_POST['lang'];
-    $article  = $_POST['article'];
+    $content  = $_POST['content'];
     $is_author= isset($_POST['is_author']) ? true : false;
-    $original = isset($is_author) ? null : $_POST['original'];
+    $original = $_POST['original'];
 	if ( !in_array($lang, ["en", "zh"])) {
 		$lang = "en";
-	}
-    $excerpt = strip_tags($article);
-    $excerpt = mb_substr( $excerpt, 0, 200, "UTF-8") . '...';  
-	global $wsdb;
+    }
+
+
+    $excerpt = strip_tags($content);
+    if( $lang == 'zh' )
+        $excerpt = mb_substr( $excerpt, 0, 200, "UTF-8") . '...';  
+    else 
+        $excerpt = mb_substr( $excerpt, 0, 400, "UTF-8") . '...';  
+
+    $authors = explode(';', $_POST['author']);
     $data =['is_author' => $is_author, 'original' => $original, 'user_id' => $user->loged_user->ID,
-        'lang' => $lang, $lang . '_title' => $title, $lang . '_content' => $article, $lang . '_excerpt' => $excerpt];
+        'lang' => $lang, $lang . '_title' => $title, $lang . '_content' => $content, $lang . '_excerpt' => $excerpt, 'authors'=> $authors];
 
     if( count( $splited_uri ) == 2 ) {
         if( $post->user_id != $user->loged_user->ID )
             exit();
-        if( $wsdb->update('articles', $data, ['ID' => $post->ID], null ,[ 'ID'=>'%d'])){
-            $ID = $wsdb->insert_id;
-            header("Location: /article/$post->ID", true, '303');
-            exit();
-        }
+
+        $article->update_article( $post->ID, $data );
+        header("Location: /article/$post->ID", true, '303');
+        exit();
     }
-    elseif ($wsdb->insert('articles', $data)){
-        $ID = $wsdb->insert_id;
+    elseif ($ID = $article->insert_article($data) ){
         header("Location: /article/$ID", true, '303');
         exit();
     }

@@ -207,6 +207,7 @@ class WS_DB {
 
 
     public function query($query) {
+
         if (!$this->ready) {
             $this->check_current_query = true;
             WS_Error::add_error('db not ready. ');
@@ -229,6 +230,10 @@ class WS_DB {
 
         $this->_do_query($query);
 
+        //if ( substr($query, 0, 6) == 'UPDATE' ) {
+        //    echo $query;
+        //    echo mysqli_affected_rows($this->dbh);
+        //}
         // MySQL server has gone away, try to reconnect.
         $mysql_errno = 0;
         if (!empty($this->dbh)) {
@@ -289,6 +294,34 @@ class WS_DB {
         return $return_val;
     }
 
+    public function delete( $table, $where, $where_format = null ) {
+		if ( ! is_array( $where ) ) {
+			return false;
+		}
+
+		$where = $this->process_fields( $table, $where, $where_format );
+		if ( false === $where ) {
+			return false;
+		}
+
+		$conditions = $values = array();
+		foreach ( $where as $field => $value ) {
+			if ( is_null( $value['value'] ) ) {
+				$conditions[] = "`$field` IS NULL";
+				continue;
+			}
+
+			$conditions[] = "`$field` = " . $value['format'];
+			$values[] = $value['value'];
+		}
+
+		$conditions = implode( ' AND ', $conditions );
+
+		$sql = "DELETE FROM `$table` WHERE $conditions";
+
+		$this->check_current_query = false;
+		return $this->query( $this->prepare( $sql, $values ) );
+	}
 	public function check_connection( ) {
 		if ( ! empty( $this->dbh ) && mysqli_ping( $this->dbh ) ) {
 			return true;
@@ -343,10 +376,12 @@ class WS_DB {
 		if ( false === $data ) {
 			return false;
 		}
+
 		$where = $this->process_fields( $table, $where, $where_format );
 		if ( false === $where ) {
 			return false;
 		}
+
 
 		$fields = $conditions = $values = array();
 		foreach ( $data as $field => $value ) {

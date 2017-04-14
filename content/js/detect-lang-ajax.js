@@ -1,9 +1,10 @@
+(function(){
 var xmlhttp;
 if(document.all) {
     window.attachEvent('onload', init_xmlhttp);
 }
 else {
-    window.addEventListener('click', init_xmlhttp, false);
+    window.addEventListener('load', init_xmlhttp, false);
 }
 function init_xmlhttp() {
 
@@ -14,7 +15,7 @@ function init_xmlhttp() {
 		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 	}
 	xmlhttp.onreadystatechange = state_change;
-	var ckeditor = CKEDITOR.instances['article'];
+	var ckeditor = CKEDITOR.instances['content'];
 	ckeditor.on('change',on_text_change);
 }
 
@@ -27,14 +28,15 @@ function state_change () {
 }
 
 function on_text_change() {
-	var str = this.getData();
-	if( str.length != 0 && str.length % 100 == 0 )
+	var str = this.document.getBody().getText(); 
+	if( str.length != 0 && str.length % 10 == 0 ){
 		detect_lang(str);
+    }
 }
 
 function detect_lang(str) {
-	xmlhttp.open("POST","detect.py",true);
+	xmlhttp.open("POST","/detect.py",true);
 	xmlhttp.setRequestHeader("Content-type","text/plain; charset=UTF-8;");
 	xmlhttp.send(str);
 }
-
+})();

@@ -54,7 +54,7 @@ final class WS_ArticleManage {
     }
     
     public function __get( $name ) {
-            return $this->_page_article->$name;
+        return $this->_page_article->$name;
     }
 
     public function get_article( $ID, $field = Null) {
@@ -71,6 +71,53 @@ final class WS_ArticleManage {
         $article['authors'] = $this->get_authors($ID);
         return new WS_Article( $article );
     }
+
+    public function update_article( $ID, $data ) {
+        $names = $data['authors'];
+        unset($data['authors']);
+
+        //print_r($data);
+        $this->_db->delete('term_rel', ['rel' => 'article_author', 'ID_1' => $ID], ['%s', '%d']);
+        $this->link_article_names_rel( $ID, $names );
+        $this->_db->update('articles', $data, ['ID' => $ID], null ,[ 'ID'=>'%d']);
+        return true;
+    }
+
+    public function link_article_names_rel ( $article_id, $names ) {
+        foreach ( $names as $name ) {
+            $name = trim($name);
+            $name = strtolower($name);
+            $name = ucwords($name);
+            $author = $this->_db->get_row("
+            SELECT ID
+            FROM authors
+            WHERE name='$name'
+            ");
+            if( $author == null ){
+                $this->_db->insert('authors', ['name' => $name]);
+                $author_id = $this->_db->insert_id;
+            }
+            else
+                $author_id = $author->ID;
+
+            $this->_db->insert('term_rel', ['rel' => 'article_author', 'ID_1' => $article_id, 'ID_2' => $author_id], ['%s', '%d','%d']);
+        }
+    }
+    public function insert_article( $data ) {
+        $names = $data['authors'];
+        unset($data['authors']);
+        $article_id = false;
+        if( !$this->_db->insert('articles', $data))
+            return false;
+        $article_id = $this->_db->insert_id;
+
+        $this->link_article_names_rel( $article_id, $names);
+
+        return $article_id;    
+    }
+
+
+
     public function get_authors($ID) {
         $authors = array();
         $author_ID = $this->_db->get_results("
@@ -83,7 +130,7 @@ final class WS_ArticleManage {
             $t = $s_id['ID_2'];
             $authors[$i] = $this->_db->get_row("
     	    SELECT *
-    	    FROM author
+    	    FROM authors
             WHERE ID=$t
     	    ");
             $i++;

@@ -23,7 +23,6 @@
     require_once ( ABSPATH . WWSINC . 'formatting.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-db.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-article.php' );
-    require_once ( ABSPATH . WWSINC . 'class-wws.php' );
     require_once ( ABSPATH . WWSINC . 'class-ws-error.php' ); 
     require_once ( ABSPATH . WWSINC . 'class-ws-comment.php' ); 
     require_once ( ABSPATH . WWSINC . 'l10n.php' );
@@ -41,7 +40,6 @@
     $GLOBALS['wsdb']->field_types = ['is_author' => '%d', 'user_id' => '%d'];
     $GLOBALS['article'] = WS_ArticleManage::instance();
     $GLOBALS['user'] = WS_UserManage::instance();
-    $GLOBALS['wws'] = new WWS;
 
     date_default_timezone_set('UTC'); 
     $GLOBALS['user']->check_login();

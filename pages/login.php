@@ -26,14 +26,13 @@ switch ($action) {
             WS_Error::print_error('<h2>', '</h2>');
         ?>
         <h1>Login</h1>
-        <form name="loginform" id="loginform" action="/login?redirect_to=<?php echo base64_encode( $redirect_to )  ?>" method="post">
+        <form name="loginform" class="loginform" id="loginform" action="/login?redirect_to=<?php echo base64_encode( $redirect_to )  ?>" method="post">
         <p class="group-inputs">
     		<input type="text" name="log" id="user_login" class="input bottom-line" value="<?php echo isset($_POST['log'])?$_POST['log']:'' ?>" size="20" placeholder="email or username">
     		<input type="password" name="pwd" id="user_pass" class="input" value="<?php echo isset($_POST['pwd'])?$_POST['pwd']:'' ?>" size="20" placeholder="password">
         </p>
     	<p class="submit">
-    		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="Log In">
-    		<input type="hidden" name="testcookie" value="1">
+    		<input type="submit" name="submit" id="submit" class="button button-primary button-large" value="Log In">
     	</p>
         </form>
 <?php
@@ -60,8 +59,7 @@ switch ($action) {
         		<input type="password" name="pwd" id="user_pass" class="input" value="<?php echo isset($_POST['pwd'])?$_POST['pwd']:'' ?>" size="20" placeholder="password">
             </p>
         	<p class="submit">
-        		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="Sign Up">
-        		<input type="hidden" name="testcookie" value="1">
+        		<input type="submit" name="submit" id="submit" class="button button-primary button-large" value="Sign Up">
         	</p>
         </form>
         <?php

@@ -4,7 +4,7 @@
         editor.addCommand( 'upload', {
             exec: function( editor ) {
                 if( typeof(inputfile) == "undefined" ){
-                    abbs = CKEDITOR.document.getById("cke_article");
+                    abbs = CKEDITOR.document.getBody();
                     abbs.appendHtml('<form enctype="multipart/form-data" method="post" name="imagefile">'+
                                     '<input id="inputfile" name="inputfile" type="file" multiple=""'+ 
                                     'accept="image/jpg,image/jpeg,image/png,image/gif" style="display: none;">'+
@@ -24,8 +24,7 @@
                             }
 
                             if ( window.FormData !== undefined){
-                                var xmlhttp = new XMLHttpRequest();
-                                xmlhttp.open("POST", "image.py", true);
+                                xmlhttp.open("POST", "/image.py", true);
                                 var image = new FormData(document.forms.namedItem("imagefile"));
                                 xmlhttp.onload = function( event ) {
                                     if(this.status == 200) {
@@ -50,6 +49,8 @@
             command: 'upload',
             toolbar: 'insert'
         });
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.timeout = 6000;
     }
 });
 var loadingImage = 'data:image/gif;base64,R0lGODlhDgAOAIAAAAAAAP///yH5BAAAAAAALAAAAAAOAA4AAAIMhI+py+0Po5y02qsKADs=';

@@ -23,7 +23,7 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'others' },
 	];
 
-    config.allowedContent = true;
+    config.extraAllowedContent  = 'img(*)[*]';
     config.customConfig = '/content/js/jquery-3.2.1.slim.min.js';
     config.mathJaxLib = 'https://cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-AMS_HTML';
 	// The default plugins included in the basic setup define some buttons that
