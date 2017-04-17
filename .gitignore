@@ -1,4 +1,6 @@
 /phpmyadmin/
+/content/image/
+
 conf.php
 
 #not vim caching file

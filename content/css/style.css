@@ -284,7 +284,7 @@
     -webkit-box-shadow: 0 0 0 30px #fff inset;
     -webkit-text-fill-color: #555;
 }
-.login .loginform .button{
+.login .button{
     border: 1px solid #d5d5d5;
     border-radius: 5px;
 }
@@ -292,7 +292,7 @@
 .group-inputs {
     border: 1px solid #d5d5d5;
 }
-.login .loginform .bottom-line{
+.login-body .login .bottom-line{
     border-bottom: 1px solid #d5d5d5;
 }
 
