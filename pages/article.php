@@ -13,8 +13,10 @@ endif;
 function translate($lang) {
     echo '<div class="submit-translate"><p>no traslation</p><a href="/translate/' . $GLOBALS['article']->ID . '?lang=' . $lang .'">translate</a></div>';
 }
-
-get_header(); ?>
+function load_comment() {
+    load_script('comment-ajax.js');
+}
+get_header('load_comment'); ?>
     <main id="main" class="site-main" role="main">
         <div class="posts" >
         <div id="post-en" style="<?php echo $en_css ?>">
@@ -33,10 +35,12 @@ get_header(); ?>
                 </div>
                 <div id="content-zh" class="content"><?php echo is_null($article->zh_content)?translate('zh'):$article->zh_content; ?></div>
         </div>
-                <!--<div class="comment-area">
-                        <textarea class="comment" name="comment-1" id="comment-1" maxlength="140" placeholder="What do you thing?"></textarea>
-                        <input type="submit" name="submit" id="submit" class="button button-comment" value="submit">
-                </div>-->
+        <form id="comment-area" class="comment-area" >
+                <input type="hidden" name="article" value="<?php echo $article->ID ?>" >
+                <textarea class="comment" name="comment" id="comment" maxlength="140" placeholder="What do you thing?"></textarea>
+                <input type="submit" name="submit" id="submit" class="button button-comment" value="submit">
+                <div id = "inbox"> </div>
+        </form>
         </div>
         <div id="secondary" class="siderbar" role="complementary">
             <?php
