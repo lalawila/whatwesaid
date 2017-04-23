@@ -117,24 +117,13 @@ final class WS_ArticleManage {
     }
 
 
-
     public function get_authors($ID) {
         $authors = array();
-        $author_ID = $this->_db->get_results("
-    	SELECT ID_2
-    	FROM term_rel
-        WHERE ID_1=$ID AND rel='article_author' 
-    	", ARRAY_A);
-        $i = 0;
-        foreach ($author_ID as $s_id) {
-            $t = $s_id['ID_2'];
-            $authors[$i] = $this->_db->get_row("
-    	    SELECT *
-    	    FROM authors
-            WHERE ID=$t
-    	    ");
-            $i++;
-        }
+        $authors = $this->_db->get_results("
+    	SELECT authors.* 
+    	FROM term_rel, authors
+        WHERE term_rel.ID_1=$ID AND term_rel.rel='article_author' AND authors.ID=term_rel.ID_2
+    	");
         return $authors;
     }
 
