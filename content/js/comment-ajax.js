@@ -16,14 +16,14 @@
         var json = {};
         json["comment"] = form.children("#comment").val();
         form.disable();
-        $.post_json("/comment/new.py", json, function(response){
+        $.put_json("/api/comment", json, function(response){
             form.enable();
         });  
     }
 
-    jQuery.post_json = function( url, args, callback ) {
+    jQuery.put_json = function( url, args, callback ) {
 
-        $.ajax({url: url ,data: $.param(args), dataType:"text", type: "POST", 
+        $.ajax({url: url ,data: $.param(args), dataType:"text", type: "PUT", 
             success: function(response) {
                 if( callback ) callback(eval("(" + response + ")" ));
         }, error: function(response) {
@@ -55,7 +55,7 @@
         poll: function() {
             var args = { "article" : $("#comment-area input[name='article']").val()};
             if( updater.cursor ) args.cursor = updater.cursor;
-            $.ajax({ url:"/comment/updates.py", type: "POST", dataType: "text",
+            $.ajax({ url:"/api/comment", type: "GET", dataType: "text",
                 data: $.param(args), success: updater.onSuccess, error: updater.onError });
         },
 

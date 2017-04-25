@@ -195,9 +195,22 @@ class CommentBuffer(object):
 global_comment_buffer = CommentBuffer()
 
 
-class CommentNewHandler(WWSHandler):
+class CommentHandler(WWSHandler):
     @gen.coroutine
-    def post(self):
+    def get(self):
+        cursor = self.get_argument("cursor",None)
+        article = self.get_arguments("article")
+        self.future = global_comment_buffer.wait_for_comments(article=article, cursor=cursor)
+        comment = yield self.future
+        if self.request.connection.stream.closed():
+            return
+        self.write(dict(comments = comment))
+
+    def on_connection_close(self):
+        global_comment_buffer.cancel_wait(self.future)
+        
+    @gen.coroutine
+    def put(self):
         user = yield self.current_user
 
         if user is None:
@@ -213,20 +226,6 @@ class CommentNewHandler(WWSHandler):
         }
         self.write(comment)
         global_comment_buffer.new_comments(comment)
-
-class CommentUpdatesHandler(tornado.web.RequestHandler):
-    @gen.coroutine
-    def post(self):
-        cursor = self.get_argument("cursor",None)
-        article = self.get_arguments("article")
-        self.future = global_comment_buffer.wait_for_comments(article=article, cursor=cursor)
-        comment = yield self.future
-        if self.request.connection.stream.closed():
-            return
-        self.write(dict(comments = comment))
-
-    def on_connection_close(self):
-        global_comment_buffer.cancel_wait(self.future)
 
 
 class ImageHandle(tornado.web.RequestHandler):
@@ -258,7 +257,7 @@ if __name__ == '__main__':
     app = web.Application(handlers=[
         (r"/api/detection",DetectLang),
         (r"/api/status",StatusHandler),
-        (r"/api/comment",CommentNewHandler),
+        (r"/api/comment",CommentHandler),
         (r"/api/like",LikeHandler),
         (r"/api/image",ImageHandle),
         (r"/api/404",FEFHandler)
