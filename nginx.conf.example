@@ -1,91 +1,142 @@
-# For more information on configuration, see:
-#   * Official English Documentation: http://nginx.org/en/docs/
-#   * Official Russian Documentation: http://nginx.org/ru/docs/
 
-user nginx;
-worker_processes auto;
-error_log /var/log/nginx/error.log;
-pid /run/nginx.pid;
+#user  nobody;
+worker_processes  1;
 
-# Load dynamic modules. See /usr/share/nginx/README.dynamic.
-include /usr/share/nginx/modules/*.conf;
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
 
 events {
-    worker_connections 1024;
+    worker_connections  1024;
 }
 
+
 http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+
     client_max_body_size 5m;
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  /var/log/nginx/access.log  main;
+    #access_log  logs/access.log  main;
 
-    sendfile            on;
-    tcp_nopush          on;
-    tcp_nodelay         on;
-    keepalive_timeout   65;
-    types_hash_max_size 2048;
+    sendfile        on;
+    #tcp_nopush     on;
 
-    include             /etc/nginx/mime.types;
-    default_type        application/octet-stream;
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
 
-    # Load modular configuration files from the /etc/nginx/conf.d directory.
-    # See http://nginx.org/en/docs/ngx_core_module.html#include
-    # for more information.
-    include /etc/nginx/conf.d/*.conf;
+    #gzip  on;
 
     server {
         listen       80;
-	    return 301 https://$host$request_uri;
+        server_name  localhost;
 
-    }
-# Settings for a TLS enabled server.
- 
-     server {
-         listen       443 ssl http2 default_server;
-         listen       [::]:443 ssl http2 default_server;
-         server_name  _;
-         root         /var/www/html/whatwesaid;
-	 index index.php;
- 
-         ssl_certificate "/etc/letsencrypt/live/whatwesaid.xyz/fullchain.pem";
-         ssl_certificate_key "/etc/letsencrypt/live/whatwesaid.xyz/privkey.pem";
-	    ssl_trusted_certificate "/etc/letsencrypt/live/whatwesaid.xyz/chain.pem";
-         ssl_session_cache shared:SSL:1m;
-         ssl_session_timeout  10m;
-         ssl_ciphers HIGH:!aNULL:!MD5;
-         ssl_prefer_server_ciphers on;
- 
-         #Load configuration files for the default server block.
-         include /etc/nginx/default.d/*.conf;
- 
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+	
+	root /home/lalawila/whatwesaid/;
+	index index.php;	
     location / {
-	 	rewrite ^.*$ /index.php last;
+		rewrite ^(.*)$ /index.php last;
     }
-	location ^~ /content/ {
+
+	location ~ ^/content/.+[^/]$ {
+		
+	}	
+	
+	location ^~ /phpmyadmin/ {
+	
+	}
+	
+	location = /index.php {
+		try_files $uri =404;
+
+		include fastcgi.conf;
+		fastcgi_pass 127.0.0.1:9000;
 	}
 
-	 location ~ .+\.py$ {
-		proxy_pass	http://127.0.0.1:8000;
+	location ^~ /api/ {
+		proxy_pass   http://127.0.0.1:8000;
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header Host $host;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;	
-	 }
-	 location = /index.php {
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		
-	 	include fastcgi.conf;
-	 	fastcgi_pass 127.0.0.1:9000;
-	 }
-	 location /phpmyadmin/ {
-	 }
-	 location ~ ^/phpmyadmin/.*\.php$ {
-	 	include fastcgi.conf;
-		fastcgi_pass 127.0.0.1:9000;
-	 }
- 
-     }
+	}	
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+        #
+        #location ~ \.php$ {
+        #    proxy_pass   http://127.0.0.1;
+        #}
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #    root           html;
+        #    fastcgi_pass   127.0.0.1:9000;
+        #    fastcgi_index  index.php;
+        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    include        fastcgi_params;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #    deny  all;
+        #}
+    }
+
+
+    # another virtual host using mix of IP-, name-, and port-based configuration
+    #
+    #server {
+    #    listen       8000;
+    #    listen       somename:8080;
+    #    server_name  somename  alias  another.alias;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
+
+
+    # HTTPS server
+    #
+    #server {
+    #    listen       443 ssl;
+    #    server_name  localhost;
+
+    #    ssl_certificate      cert.pem;
+    #    ssl_certificate_key  cert.key;
+
+    #    ssl_session_cache    shared:SSL:1m;
+    #    ssl_session_timeout  5m;
+
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
 
 }
-
