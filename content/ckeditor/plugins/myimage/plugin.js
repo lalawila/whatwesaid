@@ -24,7 +24,7 @@
                             }
 
                             if ( window.FormData !== undefined){
-                                xmlhttp.open("POST", "/image.py", true);
+                                xmlhttp.open("PUT", "/api/image", true);
                                 var image = new FormData(document.forms.namedItem("imagefile"));
                                 xmlhttp.onload = function( event ) {
                                     if(this.status == 200) {

@@ -9,6 +9,8 @@ import time
 import os
 import tornadis
 import tormysql
+import json
+import bcrypt
 
 from urllib.parse import unquote
 from functools import partial
@@ -31,6 +33,36 @@ pool = tormysql.helpers.ConnectionPool(
     db = "wws",
     charset = "utf8"
 )
+class Op(object):
+    pass
+
+class CommentOp(object):
+    @gen.coroutine
+    def add_comment(self, comment, article_ID, user_ID, time):
+        result = yield redis_client.call("Rpush", "comment:" + str(article_ID),\
+        json.dumps(dict(uid=user_ID, time = time)) )
+    
+    @gen.coroutine
+    def get_comments(self, article_ID):
+        result = yield redis_client.call( "LRANGE", "comment:" + str(article_ID), 0, -1)
+
+
+class LikeOp(Op):
+    @gen.coroutine
+    def like(self, article_ID, user_ID):
+        result = yield redis_client.call("HSETNX" , "LIKES", str(article_ID), 0)
+        result = yield redis_client.call("HINCRBY", "LIKES", str(article_ID), 1)
+        sql = yield pool.begin()
+        try: 
+            yield sql.execute("INSERT INTO `term_rel`(`rel`,`ID_1`,`ID_2`) " +
+                    "values('like_article_user',%d,%d)" % (article_ID,user_ID))
+        except:
+            yield sql.rollback()
+        else:
+            yield sql.commit()
+         
+        raise gen.Return(True)
+
 
 class FEFHandler(tornado.web.RequestHandler):
     def get(self):
@@ -39,19 +71,45 @@ class FEFHandler(tornado.web.RequestHandler):
     def post(self):
         self.write(dict(status = "error", reason = "no_login"))
 
-
-class LikeHandler(tornado.web.RequestHandler):
+class WWSHandler(tornado.web.RequestHandler):
     @gen.coroutine
     def get_current_user(self):
-        if not hasattr(self, "_current_user"):
-            login_cookie = unquote(self.get_cookie('logined'))
-            if login_cookie is not None:
-                splited = login_cookie.split('|')
-                user_login = splited[0] 
-                cursor = yield pool.execute("SELECT * FROM `users` WHERE `user_login` = '%s'"%(user_login))
-                user = cursor.fetchall()
-                self._current_user = user[0] if len(user) > 0 else None
+        if hasattr(self, "_current_user"):
+            raise gen.Return(self._current_user)
+
+        self._current_user = None
+        login_cookie = self.get_cookie('logined')
+        if login_cookie is None:
+            raise gen.Return(None)
+
+        login_cookie = unquote(login_cookie)
+        splited = login_cookie.split('|')
+        if len(splited) != 2 :
+            raise gen.Return(None)
+                
+        user_login = splited[0]
+        user_pwd = splited[1]
+        user_IP = yield redis_client.call("GET", "user:" + user_login)
+        if user_IP == self.request.remote_ip:
+            raise gen.Return(user_login) 
+
+        cursor = yield pool.execute(\
+        "SELECT * FROM `users` WHERE `user_login` = '%s'"%(user_login))
+        user = cursor.fetchall()
+        if len(user) != 1:
+            raise gen.Return(None)
+
+        if bcrypt.hashpw(user[0][2].encode("utf-8"), user_pwd.encode("utf-8")) == user_pwd.encode("utf-8"):
+            self._current_user = user[0][1]
+            yield redis_client.call("SET", "user:" + user_login, self.request.remote_ip)
+            yield redis_client.call("EXPIRE", "user:" + user_login, "1800") 
+            
+
         raise gen.Return(self._current_user)
+
+
+
+class LikeHandler(WWSHandler):
     
     def get_login_uri(self):
         return r"/404.py"
@@ -71,15 +129,6 @@ class LikeHandler(tornado.web.RequestHandler):
         self.write(dict(status = "ok", likes = result))
         self.finish()
         article = 21
-        #with (yield pool.Connection()) as conn:
-        #    try:
-        #        with conn.cursor() as cursor:
-        #            yield cursor.execute("INSERT INTO `term_rel`(`rel`,`ID_1`,`ID_2`) " +
-        #            "values('like_article_user',%d,%d)" % (article,user))
-        #    except:
-        #        yield conn.rollback()
-        #    else:
-        #        yield conn.commit()
         sql = yield pool.begin()
         try: 
             yield sql.execute("INSERT INTO `term_rel`(`rel`,`ID_1`,`ID_2`) " +
@@ -120,7 +169,6 @@ class CommentBuffer(object):
             result_future.set_result(self.cache[-new_count:])
             return result_future
         self.add_wait(result_future)
-        #self.waiters.add(result_future)
         return result_future
 
     def add_wait(self, future):
@@ -132,25 +180,39 @@ class CommentBuffer(object):
             self.waiters.remove(future)
             future.set_result([])
     
-    def new_comments(self, comments):
+    def new_comments(self, comment):
         for future in self.waiters:
-            future.set_result(comments)
+            future.set_result(comment)
         self.waiters = set()
-        self.cache.extend(comments)
+        self.cache.extend([comment])
         if len(self.cache) > self.cache_size:
             self.cache = self.cache[-self.cache_size:]
+
+        c_op = CommentOp()
+        c_op.add_comment(comment = comment['comment'], article_ID = comment['article'], user_ID = comment['user'], time = comment['time'])
+        c_op.get_comments(1)
 
 global_comment_buffer = CommentBuffer()
 
 
-class CommentNewHandler(tornado.web.RequestHandler):
+class CommentNewHandler(WWSHandler):
+    @gen.coroutine
     def post(self):
+        user = yield self.current_user
+
+        if user is None:
+            self.write(dict(status = "error", reason = "no_login"))
+            self.finish()
+            return 
+
         comment = {
+            "user": user[0],
+            "article": self.get_argument("comment"),
             "time" : str(time.time()),
             "comment" : self.get_argument("comment"),
         }
         self.write(comment)
-        global_comment_buffer.new_comments([comment])
+        global_comment_buffer.new_comments(comment)
 
 class CommentUpdatesHandler(tornado.web.RequestHandler):
     @gen.coroutine
@@ -158,17 +220,17 @@ class CommentUpdatesHandler(tornado.web.RequestHandler):
         cursor = self.get_argument("cursor",None)
         article = self.get_arguments("article")
         self.future = global_comment_buffer.wait_for_comments(article=article, cursor=cursor)
-        comments = yield self.future
+        comment = yield self.future
         if self.request.connection.stream.closed():
             return
-        self.write(dict(comments = comments))
+        self.write(dict(comments = comment))
 
     def on_connection_close(self):
         global_comment_buffer.cancel_wait(self.future)
 
 
 class ImageHandle(tornado.web.RequestHandler):
-    async def post(self):
+    async def put(self):
         upload_path = os.path.join('content', 'image')
         file_metas=self.request.files['inputfile']
         for meta in file_metas:
@@ -194,13 +256,12 @@ if __name__ == '__main__':
     tornado.options.parse_command_line()
 
     app = web.Application(handlers=[
-        (r"/detect.py",DetectLang),
-        (r"/status.py",StatusHandler),
-        (r"/comment/new.py",CommentNewHandler),
-        (r"/comment/updates.py",CommentUpdatesHandler),
-        (r"/like.py",LikeHandler),
-        (r"/image.py",ImageHandle),
-        (r"/404.py",FEFHandler)
+        (r"/api/detection",DetectLang),
+        (r"/api/status",StatusHandler),
+        (r"/api/comment",CommentNewHandler),
+        (r"/api/like",LikeHandler),
+        (r"/api/image",ImageHandle),
+        (r"/api/404",FEFHandler)
         ], debug = False)
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)

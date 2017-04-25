@@ -148,7 +148,7 @@ final class WS_UserManage {
             return false;
         }
         if($new_user->pwd_verify( $_POST['pwd'] )){
-            setcookie('logined',$new_user->user_login . '|' . password_hash($new_user->user_pwd, PASSWORD_DEFAULT ),time()+MONTH_IN_SECONDS,'/', "." . site_name );
+            setcookie('logined',$new_user->user_login . '|' . password_hash($new_user->user_pwd, PASSWORD_BCRYPT),time()+MONTH_IN_SECONDS,'/', "." . site_name );
             $user = $new_user;
             $this->loged_user = $new_user;
             $this->has_logined = true;
