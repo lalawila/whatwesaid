@@ -15,6 +15,7 @@
     function new_comment(form){
         var json = {};
         json["comment"] = form.children("#comment").val();
+        json["article"] = $("#comment-area input[name='article']").val();
         form.disable();
         $.put_json("/api/comment", json, function(response){
             form.enable();

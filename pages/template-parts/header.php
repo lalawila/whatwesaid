@@ -10,6 +10,7 @@
 	<?php 
 	load_style('style.css');
     load_script('script.js');
+    load_script('jquery.blockUI.min.js');
     if( $func != null )
         $func();
     ?>
