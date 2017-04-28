@@ -18,7 +18,8 @@ function load_comment() {
 }
 get_header('load_comment'); ?>
     <main id="main" class="site-main" role="main">
-        <div class="posts" >
+    <div class = "article">
+        <div id = "primary" class="main" >
         <div id="post-en" style="<?php echo $en_css ?>">
                 <h1 id="title-en" class="title" ><?php echo is_null($article->en_title)?$article->title:$article->en_title; ?></h1>
                 <div class="select-lang">
@@ -54,5 +55,6 @@ get_header('load_comment'); ?>
             endif;
             ?>
         </div>
+    </div>
     </main><!-- .site-main -->
 <?php get_footer();

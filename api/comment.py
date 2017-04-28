@@ -14,13 +14,14 @@ class CommentOp(object):
     @gen.coroutine
     def add_comment(self, comment, article_ID, user_ID, time):
         result = yield redis_client.call("Rpush", "comment:" + str(article_ID),\
-        json.dumps(dict(uid=user_ID, time = time)) )
-        print('add to:')
-        print(result)
+        json.dumps(dict(uid=user_ID, time = time, comment = comment)) )
     
     @gen.coroutine
     def get_comments(self, article_ID):
         result = yield redis_client.call( "LRANGE", "comment:" + str(article_ID), 0, -1)
+        result = b",".join(result)
+        result = "[" + result.decode()  +"]"
+        result = json.loads(result)
         raise gen.Return(result) 
 
         
@@ -29,8 +30,6 @@ cmt_op = CommentOp()
 class CommentBuffer(object):
     def __init__(self):
         self.waiters = set()
-        self.cache = []
-        self.cache_size = 200
 
     @gen.coroutine
     def wait_for_comments(self, article, cursor = None):
@@ -38,15 +37,16 @@ class CommentBuffer(object):
         new_count = 0
         cmts = yield cmt_op.get_comments(article)
         if cursor:
-            for cmt in reversed(self.cache):
+            for cmt in reversed(cmts):
+                print('123')
                 if cmt["time"] == cursor:
                     break
                 new_count += 1
         else:
-            new_count = len(self.cache)
+            new_count = len(cmts)
 
         if new_count:
-            result_future.set_result(self.cache[-new_count:])
+            result_future.set_result(cmts[-new_count:])
             raise gen.Return(result_future)
         self.add_wait(result_future)
         raise gen.Return(result_future)
@@ -64,10 +64,6 @@ class CommentBuffer(object):
         for future in self.waiters:
             future.set_result(comment)
         self.waiters = set()
-        self.cache.extend([comment])
-        if len(self.cache) > self.cache_size:
-            self.cache = self.cache[-self.cache_size:]
-
         cmt_op.add_comment(comment = comment['comment'], article_ID = comment['article'], user_ID = comment['user'], time = comment['time'])
 
 
@@ -78,7 +74,7 @@ class CommentHandler(WWSHandler):
     @gen.coroutine
     def get(self):
         cursor = self.get_argument("cursor",None)
-        article = self.get_arguments("article")
+        article = self.get_argument("article")
         self.future = yield global_comment_buffer.wait_for_comments(article=article, cursor=cursor)
         comment = yield self.future
         if self.request.connection.stream.closed():

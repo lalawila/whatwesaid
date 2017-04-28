@@ -43,6 +43,10 @@
     $GLOBALS['user'] = WS_UserManage::instance();
     $GLOBALS['translation_m'] = WS_TranslationManage::instance();
 
+    $GLOBALS['redis'] = new Redis();
+    $GLOBALS['redis']->connect('45.76.176.44', 6379);
+    $GLOBALS['redis']->auth('lq931110');
+
     date_default_timezone_set('UTC'); 
     $GLOBALS['user']->check_login();
     

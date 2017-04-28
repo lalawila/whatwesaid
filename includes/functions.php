@@ -1,7 +1,9 @@
 <?php
+
 function get_header( $func = null ) {
     require_once (ABSPATH . WWSTP . 'header.php');
 }
+
 function get_site_url() {
     if (get_locale() == 'en'){
         return en_url;
@@ -12,17 +14,33 @@ function get_site_url() {
     
     return false;
 }
+
 function load_style( $style = 'style.css' ) {
-    printf('<link href="%s" type="text/css" rel="stylesheet">',
-        '/content/css/' . $style);
-    //load_ckeditor();
+    $filename = '/content/css/' . $style;
+    $filename = get_version($filename);
+    printf('<link href="%s" type="text/css" rel="stylesheet">',$filename);
 }
+
 function load_script( $script ) {
-	printf('<script src="%s" type="text/javascript"></script>', '/content/js/' . $script);
+    $filename = '/content/js/' . $script;
+    $filename = get_version($filename);
+	printf('<script src="%s" type="text/javascript"></script>', $filename);
 }
+
+function get_version( $filename ){
+    global $redis;
+    if( !($fnv = $redis->hGet('LocVersion', $filename)) ) {
+        $version = md5_file( ABSPATH . $filename );
+        $fnv = $filename . '?v=' . $version;    
+        $redis->hSet('LocVersion', $filename, $fnv);
+    }
+    return $fnv;
+}
+
 function load_ckeditor() {
     echo '<script src="/content/ckeditor/ckeditor.js"></script>';
 }
+
 function page_404() {
     require_once (ABSPATH . 'pages/404.php');
     exit();

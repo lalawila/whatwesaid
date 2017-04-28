@@ -1,5 +1,8 @@
 <?php
 
+global $redis;
+$redis->delete('LocVersion');
+
 $commands = array('git fetch --all',
 		  'git reset --hard origin/master',
 		  'git pull origin master',

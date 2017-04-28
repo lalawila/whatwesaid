@@ -18,7 +18,6 @@
 
 <body>
         <header id="masthead" class="site-header" role="banner">
-         <div class="site-header-main">
                 <nav class="primary-navigation" role="navigation" aria-label="Primary Navigation">
                
                     <ul id="menu-wws" class="menu">
@@ -37,5 +36,4 @@
                         <?php endif; ?>
                     </ul>
                 </nav>
-            </div><!-- .site-header-main -->
         </header><!-- .site-header -->
